@@ -31,7 +31,7 @@ Then open `http://localhost:8000`.
 ```text
 ├── client/
 │   ├── src/
-│   │   ├── components/  # LayoutPreview, ConfigPanel, StatsPanel
+│   │   ├── components/  # LayoutPreview, ConfigPanel, StatsPanel, NavBar, etc
 │   │   ├── hooks/       # useSiteLayout (State & API logic)
 │   │   └── types.ts     # Shared interfaces
 ├── server/
