@@ -7,7 +7,6 @@ import (
 
 const MaxSiteWidth = 100
 
-// Row represents a horizontal strip of the site
 type Row struct {
 	Y            int
 	CurrentWidth int
@@ -16,29 +15,35 @@ type Row struct {
 }
 
 func GenerateLayout(config map[DeviceType]int) SiteLayout {
-	// 1. Calculate Auto-Requirement (1 Transformer per 2 Batteries)
+	// 1. Calculate Minimum Requirement (1 per 2 batteries)
 	totalBatteries := 0
 	for dType, count := range config {
 		if dType != Transformer {
 			totalBatteries += count
 		}
 	}
-	autoTransformers := int(float64(totalBatteries) / 2.0)
+	minTransformers := totalBatteries / 2
 
-	// 2. Enforce Rule: Total cannot be less than Auto
-	// If user requests 5 but needs 10, we give 10.
-	// If user requests 15 but needs 10, we give 15 (Manual addition allowed).
-	if config[Transformer] < autoTransformers {
-		config[Transformer] = autoTransformers
+	// 2. LOGIC FIX: Treat config[Transformer] as MANUAL OVERRIDE TARGET
+	// If the user's input (config[Transformer]) is LESS than the minimum, we bump it up.
+	// If the user's input is MORE than the minimum, we respect it.
+	
+	userRequested := config[Transformer]
+	finalTransformersCount := userRequested
+
+	// Force minimum compliance
+	if finalTransformersCount < minTransformers {
+		finalTransformersCount = minTransformers
 	}
-	finalTransformers := config[Transformer]
 
 	// 3. Prepare Inventory
 	var devicesToPlace []DeviceDef
 	totalCost := 0
 	totalEnergy := 0.0
 
+	// Add Batteries
 	for dType, count := range config {
+		if dType == Transformer { continue }
 		spec := DeviceSpecs[dType]
 		for i := 0; i < count; i++ {
 			devicesToPlace = append(devicesToPlace, spec)
@@ -47,8 +52,15 @@ func GenerateLayout(config map[DeviceType]int) SiteLayout {
 		}
 	}
 
-	// 4. Algorithm: First Fit Decreasing (Tetris Packing)
-	// Sort by Width Descending (Widest items first)
+	// Add Transformers (Use final count)
+	transSpec := DeviceSpecs[Transformer]
+	for i := 0; i < finalTransformersCount; i++ {
+		devicesToPlace = append(devicesToPlace, transSpec)
+		totalCost += transSpec.Cost
+		totalEnergy += transSpec.Energy
+	}
+
+	// 4. Algorithm: Sort & Pack
 	sort.Slice(devicesToPlace, func(i, j int) bool {
 		return devicesToPlace[i].Width > devicesToPlace[j].Width
 	})
@@ -57,11 +69,8 @@ func GenerateLayout(config map[DeviceType]int) SiteLayout {
 
 	for i, device := range devicesToPlace {
 		placed := false
-		
-		// Try to fit in any existing row that has space
 		for _, row := range rows {
 			if row.CurrentWidth+device.Width <= MaxSiteWidth {
-				// Fits!
 				p := PlacedDevice{
 					ID:     fmt.Sprintf("%s-%d", device.Name, i),
 					Type:   device.Name,
@@ -74,20 +83,18 @@ func GenerateLayout(config map[DeviceType]int) SiteLayout {
 				}
 				row.Items = append(row.Items, p)
 				row.CurrentWidth += device.Width
-				if device.Height > row.Height { row.Height = device.Height } // Should remain 10
+				if device.Height > row.Height { row.Height = device.Height }
 				placed = true
 				break
 			}
 		}
 
-		// New Row if it didn't fit anywhere
 		if !placed {
 			newY := 0
 			if len(rows) > 0 {
 				lastRow := rows[len(rows)-1]
 				newY = lastRow.Y + lastRow.Height
 			}
-
 			rows = append(rows, &Row{
 				Y:            newY,
 				CurrentWidth: device.Width,
@@ -103,7 +110,6 @@ func GenerateLayout(config map[DeviceType]int) SiteLayout {
 		}
 	}
 
-	// Flatten Result
 	var finalPlaced []PlacedDevice
 	siteHeight := 0
 	for _, row := range rows {
@@ -112,15 +118,15 @@ func GenerateLayout(config map[DeviceType]int) SiteLayout {
 			siteHeight = row.Y + row.Height
 		}
 	}
-
 	if len(devicesToPlace) == 0 { siteHeight = 0 }
 
+	// IMPORTANT: Return the calculated count so the UI knows the actual total
 	return SiteLayout{
 		PlacedDevices: finalPlaced,
 		TotalWidth:    MaxSiteWidth,
 		TotalHeight:   siteHeight,
 		TotalCost:     totalCost,
 		TotalEnergy:   totalEnergy,
-		Transformers:  finalTransformers,
+		Transformers:  finalTransformersCount,
 	}
 }

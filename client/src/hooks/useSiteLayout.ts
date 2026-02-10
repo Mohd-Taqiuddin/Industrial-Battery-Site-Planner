@@ -1,14 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { DeviceType } from '../types';
+import { type DeviceType } from '../types';
 
 interface LayoutResponse {
-  placed_devices: Array<{
-    id: string;
-    type: DeviceType;
-    width: number;
-    height: number;
-    position: { x: number; y: number };
-  }>;
+  placed_devices: any[];
   total_width: number;
   total_height: number;
   total_cost: number;
@@ -30,15 +24,50 @@ export function useSiteLayout() {
     if (saved) setConfig(JSON.parse(saved));
   }, []);
 
-  const updateConfig = (type: DeviceType, delta: number) => {
-    setConfig(prev => {
-      const newVal = Math.max(0, (prev[type] || 0) + delta);
-      const newConfig = { ...prev, [type]: newVal };
-      
-      // We save immediately, but we will sync with backend response below
-      localStorage.setItem('tesla-site-config', JSON.stringify(newConfig));
-      return newConfig;
+  // --- FIXED VALIDATION LOGIC ---
+  const validateAndSetConfig = (type: DeviceType, newValue: number, currentConfig: Record<DeviceType, number>) => {
+    const safeValue = Math.max(0, newValue);
+    
+    // Create a temporary config with the NEW value applied
+    const tempConfig = { ...currentConfig, [type]: safeValue };
+
+    // 1. Calculate Total Batteries based on this NEW state
+    let totalBatteries = 0;
+    (Object.keys(tempConfig) as DeviceType[]).forEach(key => {
+      if (key !== 'Transformer') {
+        totalBatteries += tempConfig[key];
+      }
     });
+
+    // 2. Calculate the STRICT Minimum Required
+    const minTransformers = Math.floor(totalBatteries / 2);
+
+    // 3. APPLY LOGIC BASED ON WHAT CHANGED
+    if (type === 'Transformer') {
+      // CASE A: User is manually adjusting Transformers
+      // Allow change ONLY if it meets the minimum
+      if (safeValue < minTransformers) {
+        return currentConfig; // Block the change (undo)
+      }
+      // Otherwise, accept the manual override (e.g., user wants 5 but only needs 2)
+    } else {
+      // CASE B: User changed a Battery (Added or Removed)
+      // STRICT SYNC: Force Transformers to match the new requirement exactly.
+      // This fixes the bug: Removing batteries now instantly drops transformers.
+      tempConfig.Transformer = minTransformers;
+    }
+
+    // 4. Save & Return
+    localStorage.setItem('tesla-site-config', JSON.stringify(tempConfig));
+    return tempConfig;
+  };
+
+  const updateConfig = (type: DeviceType, delta: number) => {
+    setConfig(prev => validateAndSetConfig(type, (prev[type] || 0) + delta, prev));
+  };
+
+  const setDeviceCount = (type: DeviceType, value: number) => {
+    setConfig(prev => validateAndSetConfig(type, value, prev));
   };
 
   const fetchLayout = useCallback(async () => {
@@ -50,12 +79,6 @@ export function useSiteLayout() {
       });
       const data = await res.json();
       setLayout(data);
-
-      // OPTIONAL: If backend forced transformer count up, sync UI?
-      // Actually, it's better to keep UI input separate from "Applied" count
-      // so the user knows what THEY typed vs what is REQUIRED.
-      // We will leave config as is, but display data.transformers_count in stats.
-      
     } catch (err) {
       console.error(err);
     }
@@ -66,5 +89,5 @@ export function useSiteLayout() {
     return () => clearTimeout(timer);
   }, [fetchLayout]);
 
-  return { config, layout, updateConfig };
+  return { config, layout, updateConfig, setDeviceCount };
 }

@@ -105,22 +105,20 @@ html, body, #root {
   position: relative;
 }
 
-.viz-container {
-  flex: 1; /* Grow to fill panel */
+/* .viz-container {
+  flex: 1;
   background-color: var(--viz-bg);
   background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 20px 20px;
   position: relative;
   overflow: auto;
-  
-  /* Center the graph initially */
+
   display: flex;
-  align-items: center;
   justify-content: center;
-}
+} */
 
 /* Device Nodes */
-.device-node {
+/* .device-node {
   position: absolute;
   color: white;
   font-size: 10px;
@@ -133,7 +131,115 @@ html, body, #root {
   transition: all 0.4s ease;
   white-space: nowrap;
   z-index: 10;
+} */
+
+
+/* ... Keep existing root variables ... */
+
+/* --- PROFESSIONAL BLUEPRINT GRID --- */
+.viz-container {
+  flex: 1;
+  background-color: #f8f9fa; /* Very light technical grey */
+  
+  /* Technical Grid: 
+     - Small square = 10ft (50px)
+     - Large square = 50ft (250px) 
+  */
+  background-image: 
+    linear-gradient(var(--grid-line) 1px, transparent 1px), 
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 50px 50px; /* 10ft scale */
+  
+  position: relative;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  /* Allow margin:auto to center content */
 }
+
+/* --- RULERS (The numbers on the side) --- */
+.ruler-x {
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 25px;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  z-index: 20;
+  display: flex;
+  font-size: 10px;
+  color: #666;
+  font-family: monospace;
+}
+.ruler-y {
+  position: sticky;
+  left: 0;
+  width: 25px;
+  background: #fff;
+  border-right: 1px solid #ccc;
+  z-index: 20;
+  font-size: 10px;
+  color: #666;
+  font-family: monospace;
+}
+
+/* --- DEVICE "CABINET" LOOK --- */
+.device-node {
+  position: absolute;
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Cabinet Styling */
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 3px;
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.3), /* Highlight top */
+    0 2px 4px rgba(0,0,0,0.15); /* Drop Shadow */
+  
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+  cursor: crosshair;
+}
+
+.device-node:hover {
+  transform: scale(1.05); /* Pop up slightly */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  z-index: 30; /* Bring to front */
+  border-color: white;
+}
+
+/* --- REFINED COLORS (Gradients) --- */
+.bg-MegapackXL { 
+  background: linear-gradient(135deg, #ef4444, #b91c1c); 
+}
+.bg-Megapack2 { 
+  background: linear-gradient(135deg, #10b981, #047857); 
+}
+.bg-Megapack { 
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9); 
+}
+.bg-PowerPack { 
+  background: linear-gradient(135deg, #f59e0b, #b45309); 
+}
+.bg-Transformer { 
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+  border-radius: 50%; /* Keep circular */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Transformer "Icon" look */
+.bg-Transformer::after {
+  content: "⚡";
+  font-size: 10px;
+}
+
+
+
 
 /* Legend & Colors */
 .legend { display: flex; gap: 12px; padding: 10px; background: var(--bg-panel); border-bottom: 1px solid var(--border); font-size: 0.75rem; flex-wrap: wrap; }
@@ -214,9 +320,15 @@ html, body, #root {
   }
   
   /* Ensure colors print */
-  .bg-MegapackXL { background-color: #ef4444 !important; -webkit-print-color-adjust: exact; }
-  .bg-Megapack2 { background-color: #10b981 !important; -webkit-print-color-adjust: exact; }
-  .bg-Megapack { background-color: #8b5cf6 !important; -webkit-print-color-adjust: exact; }
-  .bg-PowerPack { background-color: #f59e0b !important; -webkit-print-color-adjust: exact; }
-  .bg-Transformer { background-color: #3b82f6 !important; -webkit-print-color-adjust: exact; }
+  .bg-MegapackXL { background-color: #ef4444 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bg-Megapack2 { background-color: #10b981 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bg-Megapack { background-color: #8b5cf6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bg-PowerPack { background-color: #f59e0b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bg-Transformer { background-color: #3b82f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
