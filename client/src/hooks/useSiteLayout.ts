@@ -10,11 +10,10 @@ interface LayoutResponse {
   transformers_count: number;
 }
 
-// Simple structure for our history list
 export interface SavedSession {
   id: string;
   date: string;
-  summary: string; // e.g. "50 Batteries"
+  summary: string;
 }
 
 const API_URL = "http://localhost:8080/api";
@@ -27,87 +26,85 @@ export function useSiteLayout() {
   const [layout, setLayout] = useState<LayoutResponse | null>(null);
   const [sessions, setSessions] = useState<SavedSession[]>([]);
 
-  // Load Config & Session History on Mount
+  // 1. Initial Load: Get Config AND Session List from Server
   useEffect(() => {
+    // Load local config (optional, keeps your current workspace)
     const savedConfig = localStorage.getItem('tesla-site-config');
     if (savedConfig) setConfig(JSON.parse(savedConfig));
 
-    const savedHistory = localStorage.getItem('tesla-site-history');
-    if (savedHistory) setSessions(JSON.parse(savedHistory));
+    // FETCH HISTORY FROM SERVER (Fixes the cache clear issue)
+    fetchSessions();
   }, []);
 
-  // --- SAVE LOGIC (Updated) ---
+  const fetchSessions = async () => {
+    try {
+      const res = await fetch(`${API_URL}/sessions`);
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data); // The server is now the source of truth
+      }
+    } catch (err) {
+      console.error("Failed to fetch sessions", err);
+    }
+  };
+
+  // 2. Save Logic (Refreshes list after save)
   const saveSession = async (): Promise<string | null> => {
     try {
-      // 1. Save to Server
       const res = await fetch(`${API_URL}/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ configs: config }),
       });
       const data = await res.json();
-      const newId = data.id;
-
-      // 2. Create Session Record
-      const totalItems = Object.values(config).reduce((a, b) => a + b, 0);
-      const newSession: SavedSession = {
-        id: newId,
-        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-        summary: `${totalItems} Devices`
-      };
-
-      // 3. Update Local History
-      const updatedSessions = [newSession, ...sessions];
-      setSessions(updatedSessions);
-      localStorage.setItem('tesla-site-history', JSON.stringify(updatedSessions));
-
-      return newId;
+      
+      // Refresh list from server to get the new item with server-generated date
+      await fetchSessions();
+      
+      return data.id;
     } catch (err) {
       console.error("Save failed", err);
       return null;
     }
   };
 
-  // --- LOAD LOGIC ---
+  // 3. Load Logic
   const loadSession = async (sessionId: string): Promise<boolean> => {
     try {
       const res = await fetch(`${API_URL}/load?id=${sessionId}`);
       if (!res.ok) return false;
-      
       const loadedConfig = await res.json();
-      setConfig(loadedConfig); // Updates state
+      setConfig(loadedConfig);
       return true;
     } catch (err) {
-      console.error("Load failed", err);
       return false;
     }
   };
 
-  // --- DELETE LOGIC (Local only) ---
-  const deleteSession = (id: string) => {
-    const updated = sessions.filter(s => s.id !== id);
-    setSessions(updated);
-    localStorage.setItem('tesla-site-history', JSON.stringify(updated));
-  }
+  // 4. Delete Logic
+  const deleteSession = async (id: string) => {
+    try {
+        await fetch(`${API_URL}/delete?id=${id}`, { method: 'DELETE' });
+        await fetchSessions(); // Refresh list
+    } catch (err) {
+        console.error(err);
+    }
+  };
 
-  // --- VALIDATION LOGIC (Existing) ---
+  // --- CONFIG HELPERS ---
   const validateAndSetConfig = (type: DeviceType, newValue: number, currentConfig: Record<DeviceType, number>) => {
     const safeValue = Math.max(0, newValue);
     const tempConfig = { ...currentConfig, [type]: safeValue };
-
     let totalBatteries = 0;
     (Object.keys(tempConfig) as DeviceType[]).forEach(key => {
       if (key !== 'Transformer') totalBatteries += tempConfig[key];
     });
-
     const minTransformers = Math.floor(totalBatteries / 2);
-
     if (type === 'Transformer') {
       if (safeValue < minTransformers) return currentConfig;
     } else {
       tempConfig.Transformer = minTransformers;
     }
-
     localStorage.setItem('tesla-site-config', JSON.stringify(tempConfig));
     return tempConfig;
   };
