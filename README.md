@@ -10,7 +10,7 @@ A full-stack tool to design, validate, and visualize industrial battery sites. B
 - **Session Persistence:** Save/Load designs via server-side storage (survives cache clears).
 - **Export Tools:** CSV Export for CAD integration and Print-ready reports.
 
-## 🛠 Tech Stack
+##  Tech Stack
 - **Frontend:** React, TypeScript, Vite, CSS Grid (No external UI libraries)
 - **Backend:** Go (Standard Library only - `net/http`)
 - **Containerization:** Docker & Docker Compose
