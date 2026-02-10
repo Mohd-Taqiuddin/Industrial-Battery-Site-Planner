@@ -7,7 +7,7 @@ import { StatsPanel } from './components/StatsPanel';
 import { LayoutPreview } from './components/LayoutPreview';
 
 export default function App() {
-  // Destructure all the logic hooks
+  
   const { 
     tabs, activeTabId, setActiveTabId, addTab, closeTab, renameTab, // Tab Logic
     config, layout, updateConfig, setDeviceCount, 
@@ -53,7 +53,7 @@ export default function App() {
           onSwitchTab={setActiveTabId}
           onAddTab={addTab}
           onCloseTab={closeTab}
-          onRenameTab={renameTab} // Pass the rename function
+          onRenameTab={renameTab} 
 
           // Config Props
           config={config} 

@@ -30,6 +30,7 @@ export const DeviceInputRow: React.FC<Props> = ({ type, count, onUpdate, onSetCo
         
         <input
           type="number"
+          className="clean-input"
           value={count.toString()}
           onChange={(e) => onSetCount(type, parseInt(e.target.value) || 0)}
           style={{

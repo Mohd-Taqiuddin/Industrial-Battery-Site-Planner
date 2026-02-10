@@ -134,8 +134,6 @@ html, body, #root {
 } */
 
 
-/* ... Keep existing root variables ... */
-
 /* --- PROFESSIONAL BLUEPRINT GRID --- */
 .viz-container {
   flex: 1;
@@ -333,6 +331,30 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
+/* --- FORCE HIDE INPUT ARROWS (Cross-Browser) --- */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none !important; 
+  margin: 0 !important; 
+}
+
+input[type=number] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* --- TAB CLOSE BUTTON HOVER --- */
+.close-tab-btn:hover {
+  background-color: rgba(0,0,0,0.1);
+  color: #ef4444; /* Red on hover */
+  opacity: 1 !important;
+}
+
+/* Dark mode adjust */
+[data-theme="dark"] .close-tab-btn:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
 /* Modal Overlay */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -352,3 +374,5 @@ input::-webkit-inner-spin-button {
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 .btn-primary { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; flex: 1; }
 .btn-secondary { background: var(--bg-app); border: 1px solid var(--border); color: var(--text-main); padding: 8px 16px; border-radius: 4px; cursor: pointer; flex: 1; }
+
+

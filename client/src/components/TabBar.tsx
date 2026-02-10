@@ -7,7 +7,7 @@ interface Props {
   onSwitch: (id: number) => void;
   onAdd: () => void;
   onClose: (id: number) => void;
-  onRename: (id: number, newTitle: string) => void; // <--- NEW PROP
+  onRename: (id: number, newTitle: string) => void;
 }
 
 export const TabBar: React.FC<Props> = ({ tabs, activeId, onSwitch, onAdd, onClose, onRename }) => {
@@ -32,35 +32,43 @@ export const TabBar: React.FC<Props> = ({ tabs, activeId, onSwitch, onAdd, onClo
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 4px', marginBottom: '8px', overflowX: 'auto' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 4px', marginBottom: '0', overflowX: 'auto' }}>
       {tabs.map(tab => {
         const isActive = tab.id === activeId;
         const isEditing = tab.id === editingId;
 
         return (
           <div 
+            className="tab-scroll-container"
             key={tab.id}
             onClick={() => !isEditing && onSwitch(tab.id)}
-            onDoubleClick={() => startEditing(tab.id, tab.title)} // <--- DOUBLE CLICK TRIGGER
+            onDoubleClick={() => startEditing(tab.id, tab.title)}
             title="Double-click to rename"
             style={{
-              padding: '6px 12px',
+              padding: '8px 10px',
               borderRadius: '6px 6px 0 0',
               cursor: 'pointer',
               background: isActive ? 'var(--bg-panel)' : 'var(--bg-app)',
               border: '1px solid var(--border)',
               borderBottom: isActive ? '1px solid var(--bg-panel)' : '1px solid var(--border)',
               marginBottom: '-1px', 
-              fontSize: '0.75rem',
+              fontSize: '0.8rem',
               fontWeight: 600,
-              display: 'flex', alignItems: 'center', gap: '8px',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
               color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
-              minWidth: '100px',
+              minWidth: '110px',
+              maxWidth: '180px',
               justifyContent: 'space-between',
               position: 'relative',
-              userSelect: 'none'
+              userSelect: 'none',
+              transition: 'background 0.1s',
+              zIndex: isActive ? 10 : 1,
+              overflowY: 'auto'
             }}
           >
+            {/* TAB TITLE / INPUT */}
             {isEditing ? (
               <input 
                 autoFocus
@@ -69,31 +77,58 @@ export const TabBar: React.FC<Props> = ({ tabs, activeId, onSwitch, onAdd, onClo
                 onBlur={saveEdit}
                 onKeyDown={handleKeyDown}
                 style={{
-                  width: '80px', fontSize: '0.75rem', padding: '2px', 
+                  width: '100%', fontSize: '0.8rem', padding: '2px', 
                   border: '1px solid var(--accent)', borderRadius: '2px', outline: 'none'
                 }}
               />
             ) : (
-              <span style={{whiteSpace: 'nowrap'}}>{tab.title}</span>
+              <span style={{
+                whiteSpace: 'nowrap', 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis',
+                flex: 1 // Push X to the right
+              }}>
+                {tab.title}
+              </span>
             )}
 
-            {/* Close Button (Only show if not editing and more than 1 tab) */}
+            {/* INTEGRATED CLOSE BUTTON (X) */}
             {!isEditing && tabs.length > 1 && (
               <span 
-                onClick={(e) => { e.stopPropagation(); onClose(tab.id); }}
-                style={{ fontSize: '14px', lineHeight: 0.5, opacity: 0.6, padding: '2px', marginLeft: '5px' }}
-              >×</span>
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  onClose(tab.id); 
+                }}
+                className="close-tab-btn"
+                style={{ 
+                  fontSize: '14px', 
+                  lineHeight: 1, 
+                  opacity: 0.5, 
+                  padding: '2px',
+                  borderRadius: '50%',
+                  width: '16px',
+                  height: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginLeft: '4px'
+                }}
+                title="Close Tab"
+              >
+                ×
+              </span>
             )}
           </div>
         );
       })}
       
+      {/* ADD TAB BUTTON */}
       <button 
         onClick={onAdd}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '18px', fontWeight: 'bold', color: 'var(--accent)',
-          padding: '0 8px'
+          fontSize: '18px', fontWeight: 'bold', color: 'var(--text-muted)',
+          padding: '0 8px', display: 'flex', alignItems: 'center'
         }}
         title="Add new Layout Tab"
       >
