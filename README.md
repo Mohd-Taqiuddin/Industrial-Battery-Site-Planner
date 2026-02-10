@@ -27,6 +27,8 @@ Then open `http://localhost:8000`.
 
 
 ## Project Structure
+
+```text
 ├── client/
 │   ├── src/
 │   │   ├── components/  # LayoutPreview, ConfigPanel, StatsPanel
@@ -37,7 +39,7 @@ Then open `http://localhost:8000`.
 │   ├── service.go       # Layout Algorithm & Constraints
 │   └── data/            # JSON persistence storage
 └── docker-compose.yml
-
+```
 ## API
 
 - `POST /api/calculate` -> Validates config and returns optimal layout coordinates
