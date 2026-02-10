@@ -18,6 +18,10 @@ export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDe
     setIsSaving(true);
     const id = await onSave();
     setIsSaving(false);
+
+    // FIX: If id is null (modal opened), do nothing.
+    if (id === null) return; 
+
     if (id) {
       setStatusMsg("Saved!");
       setTimeout(() => setStatusMsg(""), 2000);
@@ -110,7 +114,7 @@ export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDe
           onChange={(e) => setManualId(e.target.value)}
           style={{ flex: 1, padding: '6px', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.75rem', background: 'transparent', color: 'var(--text-main)' }}
         />
-        <button onClick={handleLoadManual} style={{ padding: '6px 12px', cursor: 'pointer', background: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.75rem' }}>
+        <button onClick={handleLoadManual} style={{ padding: '6px 12px', cursor: 'pointer', background: 'var(--accent)', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.75rem' }}>
           Load
         </button>
       </div>

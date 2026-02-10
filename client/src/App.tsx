@@ -7,8 +7,9 @@ import { StatsPanel } from './components/StatsPanel';
 import { LayoutPreview } from './components/LayoutPreview';
 
 export default function App() {
+  // Destructure all the logic hooks
   const { 
-    tabs, activeTabId, setActiveTabId, addTab, closeTab, // Tab Logic
+    tabs, activeTabId, setActiveTabId, addTab, closeTab, renameTab, // Tab Logic
     config, layout, updateConfig, setDeviceCount, 
     saveSession, loadSession, deleteSession, sessions 
   } = useSiteLayout();
@@ -23,6 +24,7 @@ export default function App() {
     document.body.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Handle Export CSV
   const handleExport = () => {
     if (!layout) return;
     const headers = "ID,Type,X (ft),Y (ft),Width (ft),Height (ft)\n";
@@ -43,6 +45,7 @@ export default function App() {
       <Navbar theme={theme} toggleTheme={toggleTheme} />
       
       <div className="dashboard-grid">
+        {/* Left Panel: Configuration & Tabs */}
         <ConfigPanel 
           // Tab Props
           tabs={tabs}
@@ -50,6 +53,7 @@ export default function App() {
           onSwitchTab={setActiveTabId}
           onAddTab={addTab}
           onCloseTab={closeTab}
+          onRenameTab={renameTab} // Pass the rename function
 
           // Config Props
           config={config} 
@@ -64,12 +68,14 @@ export default function App() {
           sessions={sessions}
         />
         
+        {/* Middle Panel: Visual Blueprint */}
         <LayoutPreview 
           devices={layout?.placed_devices || []} 
           totalWidth={layout?.total_width || 100}
           totalHeight={layout?.total_height || 100}
         />
 
+        {/* Right Panel: Metrics & BoM */}
         <StatsPanel layout={layout} config={config} />
       </div>
     </div>
