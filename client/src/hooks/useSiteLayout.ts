@@ -10,7 +10,14 @@ interface LayoutResponse {
   transformers_count: number;
 }
 
-const API_URL = "http://localhost:8080/api/calculate";
+// Simple structure for our history list
+export interface SavedSession {
+  id: string;
+  date: string;
+  summary: string; // e.g. "50 Batteries"
+}
+
+const API_URL = "http://localhost:8080/api";
 
 export function useSiteLayout() {
   const [config, setConfig] = useState<Record<DeviceType, number>>({
@@ -18,46 +25,89 @@ export function useSiteLayout() {
   });
 
   const [layout, setLayout] = useState<LayoutResponse | null>(null);
+  const [sessions, setSessions] = useState<SavedSession[]>([]);
 
+  // Load Config & Session History on Mount
   useEffect(() => {
-    const saved = localStorage.getItem('tesla-site-config');
-    if (saved) setConfig(JSON.parse(saved));
+    const savedConfig = localStorage.getItem('tesla-site-config');
+    if (savedConfig) setConfig(JSON.parse(savedConfig));
+
+    const savedHistory = localStorage.getItem('tesla-site-history');
+    if (savedHistory) setSessions(JSON.parse(savedHistory));
   }, []);
 
-  // --- FIXED VALIDATION LOGIC ---
+  // --- SAVE LOGIC (Updated) ---
+  const saveSession = async (): Promise<string | null> => {
+    try {
+      // 1. Save to Server
+      const res = await fetch(`${API_URL}/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ configs: config }),
+      });
+      const data = await res.json();
+      const newId = data.id;
+
+      // 2. Create Session Record
+      const totalItems = Object.values(config).reduce((a, b) => a + b, 0);
+      const newSession: SavedSession = {
+        id: newId,
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        summary: `${totalItems} Devices`
+      };
+
+      // 3. Update Local History
+      const updatedSessions = [newSession, ...sessions];
+      setSessions(updatedSessions);
+      localStorage.setItem('tesla-site-history', JSON.stringify(updatedSessions));
+
+      return newId;
+    } catch (err) {
+      console.error("Save failed", err);
+      return null;
+    }
+  };
+
+  // --- LOAD LOGIC ---
+  const loadSession = async (sessionId: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_URL}/load?id=${sessionId}`);
+      if (!res.ok) return false;
+      
+      const loadedConfig = await res.json();
+      setConfig(loadedConfig); // Updates state
+      return true;
+    } catch (err) {
+      console.error("Load failed", err);
+      return false;
+    }
+  };
+
+  // --- DELETE LOGIC (Local only) ---
+  const deleteSession = (id: string) => {
+    const updated = sessions.filter(s => s.id !== id);
+    setSessions(updated);
+    localStorage.setItem('tesla-site-history', JSON.stringify(updated));
+  }
+
+  // --- VALIDATION LOGIC (Existing) ---
   const validateAndSetConfig = (type: DeviceType, newValue: number, currentConfig: Record<DeviceType, number>) => {
     const safeValue = Math.max(0, newValue);
-    
-    // Create a temporary config with the NEW value applied
     const tempConfig = { ...currentConfig, [type]: safeValue };
 
-    // 1. Calculate Total Batteries based on this NEW state
     let totalBatteries = 0;
     (Object.keys(tempConfig) as DeviceType[]).forEach(key => {
-      if (key !== 'Transformer') {
-        totalBatteries += tempConfig[key];
-      }
+      if (key !== 'Transformer') totalBatteries += tempConfig[key];
     });
 
-    // 2. Calculate the STRICT Minimum Required
     const minTransformers = Math.floor(totalBatteries / 2);
 
-    // 3. APPLY LOGIC BASED ON WHAT CHANGED
     if (type === 'Transformer') {
-      // CASE A: User is manually adjusting Transformers
-      // Allow change ONLY if it meets the minimum
-      if (safeValue < minTransformers) {
-        return currentConfig; // Block the change (undo)
-      }
-      // Otherwise, accept the manual override (e.g., user wants 5 but only needs 2)
+      if (safeValue < minTransformers) return currentConfig;
     } else {
-      // CASE B: User changed a Battery (Added or Removed)
-      // STRICT SYNC: Force Transformers to match the new requirement exactly.
-      // This fixes the bug: Removing batteries now instantly drops transformers.
       tempConfig.Transformer = minTransformers;
     }
 
-    // 4. Save & Return
     localStorage.setItem('tesla-site-config', JSON.stringify(tempConfig));
     return tempConfig;
   };
@@ -72,7 +122,7 @@ export function useSiteLayout() {
 
   const fetchLayout = useCallback(async () => {
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(`${API_URL}/calculate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ configs: config }),
@@ -89,5 +139,5 @@ export function useSiteLayout() {
     return () => clearTimeout(timer);
   }, [fetchLayout]);
 
-  return { config, layout, updateConfig, setDeviceCount };
+  return { config, layout, updateConfig, setDeviceCount, saveSession, loadSession, deleteSession, sessions };
 }

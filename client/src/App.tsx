@@ -7,7 +7,7 @@ import { StatsPanel } from './components/StatsPanel';
 import { LayoutPreview } from './components/LayoutPreview';
 
 export default function App() {
-  const { config, layout, updateConfig, setDeviceCount } = useSiteLayout(); // Get new function
+  const { config, layout, updateConfig, setDeviceCount, saveSession, loadSession, deleteSession, sessions } = useSiteLayout();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const toggleTheme = () => {
@@ -38,12 +38,15 @@ export default function App() {
       <Navbar theme={theme} toggleTheme={toggleTheme} />
       
       <div className="dashboard-grid">
-        {/* Pass onSetCount to ConfigPanel */}
         <ConfigPanel 
           config={config} 
           onUpdate={updateConfig} 
           onSetCount={setDeviceCount} 
           onExport={handleExport} 
+          onSave={saveSession}
+          onLoad={loadSession}
+          onDelete={deleteSession}
+          sessions={sessions} // Pass the list
         />
         
         <LayoutPreview 
