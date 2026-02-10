@@ -1,18 +1,16 @@
 services:
   api:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    build: ./server
     ports:
       - "8080:8080"
-    restart: always
+    volumes:
+      # This will map "server_data" (on host) to "/data" (in container)
+      # If we rebuild, "server_data" stays safe on hard drive!
+      - ./server_data:/data 
 
   web:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
+    build: ./client
     ports:
       - "8000:80"
     depends_on:
       - api
-    restart: always

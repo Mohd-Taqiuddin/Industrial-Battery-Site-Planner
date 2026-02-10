@@ -1,0 +1,16 @@
+{
+  "SAVE-12915": {
+    "Megapack": 200,
+    "Megapack2": 300,
+    "MegapackXL": 400,
+    "PowerPack": 100,
+    "Transformer": 500
+  },
+  "SAVE-24102": {
+    "Megapack": 2,
+    "Megapack2": 3,
+    "MegapackXL": 4,
+    "PowerPack": 10,
+    "Transformer": 9
+  }
+}

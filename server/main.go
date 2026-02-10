@@ -5,24 +5,50 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
+	"sync"
 	"time"
 )
 
-// --- MISSING STRUCT DEFINITION ---
 type LayoutRequest struct {
 	Configs map[DeviceType]int `json:"configs"`
 }
 
-// In-Memory Database for Sessions
-var sessionStore = make(map[string]map[DeviceType]int)
+// File path to store data
+const DATA_FILE = "/data/sessions.json"
+
+// Mutex to prevent crashing if two people save at the exact same time
+var fileMutex sync.Mutex
+
+// Helper: Load from Disk
+func loadSessionsFromDisk() map[string]map[DeviceType]int {
+	file, err := os.ReadFile(DATA_FILE)
+	if err != nil {
+		return make(map[string]map[DeviceType]int) // Return empty if file doesn't exist
+	}
+	var store map[string]map[DeviceType]int
+	json.Unmarshal(file, &store)
+	return store
+}
+
+// Helper: Save to Disk
+func saveSessionsToDisk(store map[string]map[DeviceType]int) {
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+	
+	data, _ := json.MarshalIndent(store, "", "  ")
+	os.WriteFile(DATA_FILE, data, 0644)
+}
 
 func main() {
-	// Seed random generator
 	rand.Seed(time.Now().UnixNano())
+
+	// Ensure /data directory exists
+	os.MkdirAll("/data", 0755)
 
 	mux := http.NewServeMux()
 
-	// 1. Calculate Layout Endpoint
+	// 1. Calculate
 	mux.HandleFunc("/api/calculate", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == "OPTIONS" { return }
@@ -32,57 +58,47 @@ func main() {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		layout := GenerateLayout(req.Configs)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(layout)
 	})
 
-	// 2. SAVE Endpoint
+	// 2. SAVE (Persistent)
 	mux.HandleFunc("/api/save", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == "OPTIONS" { return }
-		if r.Method != "POST" {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
+		
 		var req LayoutRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		// Generate simple ID (e.g., "SAVE-9482")
 		sessionID := fmt.Sprintf("SAVE-%d", rand.Intn(99999))
-		sessionStore[sessionID] = req.Configs
+		
+		// Load, Update, Save
+		store := loadSessionsFromDisk()
+		store[sessionID] = req.Configs
+		saveSessionsToDisk(store)
 
-		response := map[string]string{"id": sessionID}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		json.NewEncoder(w).Encode(map[string]string{"id": sessionID})
 	})
 
-	// 3. LOAD Endpoint
+	// 3. LOAD (Persistent)
 	mux.HandleFunc("/api/load", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == "OPTIONS" { return }
+
+		id := r.URL.Query().Get("id")
+		store := loadSessionsFromDisk()
 		
-        // Get ID from query param ?id=SAVE-123
-        id := r.URL.Query().Get("id")
-        if id == "" {
-            http.Error(w, "Missing id parameter", http.StatusBadRequest)
-            return
-        }
-
-        // Look up
-        config, exists := sessionStore[id]
-        if !exists {
-            http.Error(w, "Session not found", http.StatusNotFound)
-            return
-        }
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(config)
+		if config, ok := store[id]; ok {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(config)
+		} else {
+			http.Error(w, "Session not found", http.StatusNotFound)
+		}
 	})
 
 	fmt.Println("Server running on :8080")
@@ -91,6 +107,6 @@ func main() {
 
 func enableCors(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
