@@ -8,11 +8,11 @@ A full-stack tool to design, validate, and visualize industrial battery sites. B
 - **Blueprint Visualization:** Interactive, grid-aligned site map that adheres to a **100ft max width**.
 - **Real-time Analytics:** Calculates Cost, Energy (MWh), Footprint (sq ft), and Energy Density (MWh/acre).
 - **Session Persistence:** Save/Load designs via server-side storage (survives cache clears).
-- **Export Tools:** CSV Export for CAD integration and Print-ready reports.
+- **Export Tools:** CSV Export and Print-ready reports.
 
 ##  Tech Stack
 - **Frontend:** React, TypeScript, Vite, CSS Grid (No external UI libraries)
-- **Backend:** Go (Standard Library only - `net/http`)
+- **Backend:** Go
 - **Containerization:** Docker & Docker Compose
 
 ##  Quick Start

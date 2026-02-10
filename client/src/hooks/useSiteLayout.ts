@@ -24,9 +24,11 @@ export interface LayoutTab {
   serverId: string | null; // "SAVE-1234" (if saved)
 }
 
-const API_URL = "http://localhost:8080/api";
+// USE ENVIRONMENT VARIABLE (Fallback to localhost for dev)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 const DEFAULT_CONFIG = { MegapackXL: 0, Megapack2: 0, Megapack: 0, PowerPack: 0, Transformer: 0 };
+
 
 export function useSiteLayout() {
   // State: List of Tabs
@@ -43,6 +45,38 @@ export function useSiteLayout() {
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
   const config = activeTab.config;
 
+
+  // --- FETCH LAYOUT ---
+  const fetchLayout = useCallback(async () => {
+    // 1. CALCULATE TOTAL ITEMS LOCALY
+    let totalItems = 0;
+    (Object.keys(config) as DeviceType[]).forEach(k => totalItems += config[k]);
+
+    // 2. IF EMPTY, CLEAR LAYOUT IMMEDIATELY & RETURN
+    if (totalItems === 0) {
+      setLayout(null); // <--- This clears the blueprint!
+      return;
+    }
+
+    // 3. OTHERWISE, CALL SERVER
+    try {
+      const res = await fetch(`${API_URL}/calculate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ configs: config }),
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setLayout(data);
+      } else {
+        // If server validates error (e.g., negative numbers), keep old layout or handle error
+        console.error("Server validation failed");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [config]);
   // --- TAB MANAGEMENT ---
   const addTab = () => {
     const newId = Math.max(...tabs.map(t => t.id)) + 1;
@@ -145,16 +179,16 @@ export function useSiteLayout() {
   const setDeviceCount = (type: DeviceType, value: number) => validateAndSetConfig(type, value);
 
   // --- FETCH LAYOUT ---
-  const fetchLayout = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_URL}/calculate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ configs: config }),
-      });
-      setLayout(await res.json());
-    } catch (err) { console.error(err); }
-  }, [config]);
+  // const fetchLayout = useCallback(async () => {
+  //   try {
+  //     const res = await fetch(`${API_URL}/calculate`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ configs: config }),
+  //     });
+  //     setLayout(await res.json());
+  //   } catch (err) { console.error(err); }
+  // }, [config]);
 
   useEffect(() => {
     const timer = setTimeout(fetchLayout, 300);

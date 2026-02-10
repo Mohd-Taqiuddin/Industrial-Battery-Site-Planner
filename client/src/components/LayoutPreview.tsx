@@ -9,7 +9,7 @@ interface Props {
 
 export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeight }) => {
   // Increased scale for better visibility and print-friendliness
-  const PIXELS_PER_FT = 7; 
+  const PIXELS_PER_FT = 6.5; 
   
   const vizWidth = totalWidth * PIXELS_PER_FT;
   const vizHeight = Math.max(totalHeight, 100) * PIXELS_PER_FT;
