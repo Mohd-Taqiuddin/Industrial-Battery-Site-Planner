@@ -7,7 +7,12 @@ import { StatsPanel } from './components/StatsPanel';
 import { LayoutPreview } from './components/LayoutPreview';
 
 export default function App() {
-  const { config, layout, updateConfig, setDeviceCount, saveSession, loadSession, deleteSession, sessions } = useSiteLayout();
+  const { 
+    tabs, activeTabId, setActiveTabId, addTab, closeTab, // Tab Logic
+    config, layout, updateConfig, setDeviceCount, 
+    saveSession, loadSession, deleteSession, sessions 
+  } = useSiteLayout();
+  
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const toggleTheme = () => {
@@ -39,14 +44,24 @@ export default function App() {
       
       <div className="dashboard-grid">
         <ConfigPanel 
+          // Tab Props
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSwitchTab={setActiveTabId}
+          onAddTab={addTab}
+          onCloseTab={closeTab}
+
+          // Config Props
           config={config} 
           onUpdate={updateConfig} 
           onSetCount={setDeviceCount} 
+          
+          // Action Props
           onExport={handleExport} 
           onSave={saveSession}
           onLoad={loadSession}
           onDelete={deleteSession}
-          sessions={sessions} // Pass the list
+          sessions={sessions}
         />
         
         <LayoutPreview 

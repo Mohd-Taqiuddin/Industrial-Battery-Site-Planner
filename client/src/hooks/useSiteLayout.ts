@@ -16,107 +16,135 @@ export interface SavedSession {
   summary: string;
 }
 
+// NEW: Tab Definition
+export interface LayoutTab {
+  id: number;           // Local Tab ID (1, 2, 3)
+  title: string;        // "Design 1"
+  config: Record<DeviceType, number>;
+  serverId: string | null; // "SAVE-1234" (if saved)
+}
+
 const API_URL = "http://localhost:8080/api";
 
-export function useSiteLayout() {
-  const [config, setConfig] = useState<Record<DeviceType, number>>({
-    MegapackXL: 0, Megapack2: 0, Megapack: 0, PowerPack: 0, Transformer: 0,
-  });
+const DEFAULT_CONFIG = { MegapackXL: 0, Megapack2: 0, Megapack: 0, PowerPack: 0, Transformer: 0 };
 
+export function useSiteLayout() {
+  // State: List of Tabs
+  const [tabs, setTabs] = useState<LayoutTab[]>([
+    { id: 1, title: 'Design 1', config: { ...DEFAULT_CONFIG }, serverId: null }
+  ]);
+  const [activeTabId, setActiveTabId] = useState<number>(1);
+  
+  // State: Visual Layout & Session History
   const [layout, setLayout] = useState<LayoutResponse | null>(null);
   const [sessions, setSessions] = useState<SavedSession[]>([]);
 
-  // 1. Initial Load: Get Config AND Session List from Server
-  useEffect(() => {
-    // Load local config (optional, keeps your current workspace)
-    const savedConfig = localStorage.getItem('tesla-site-config');
-    if (savedConfig) setConfig(JSON.parse(savedConfig));
+  // Helper: Get Active Tab
+  const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
+  const config = activeTab.config;
 
-    // FETCH HISTORY FROM SERVER (Fixes the cache clear issue)
-    fetchSessions();
-  }, []);
+  // --- TAB MANAGEMENT ---
+  const addTab = () => {
+    const newId = Math.max(...tabs.map(t => t.id)) + 1;
+    setTabs([...tabs, { 
+      id: newId, 
+      title: `Design ${newId}`, 
+      config: { ...DEFAULT_CONFIG }, 
+      serverId: null 
+    }]);
+    setActiveTabId(newId);
+  };
 
+  const closeTab = (id: number) => {
+    if (tabs.length === 1) return; // Don't close last tab
+    const newTabs = tabs.filter(t => t.id !== id);
+    setTabs(newTabs);
+    if (activeTabId === id) setActiveTabId(newTabs[0].id);
+  };
+
+  const updateActiveTabConfig = (newConfig: Record<DeviceType, number>) => {
+    setTabs(prev => prev.map(t => 
+      t.id === activeTabId ? { ...t, config: newConfig } : t
+    ));
+  };
+
+  const renameTab = (id: number, newTitle: string) => {
+    setTabs(prev => prev.map(t => t.id === id ? { ...t, title: newTitle } : t));
+  };
+
+  // --- LOAD HISTORY ---
+  useEffect(() => { fetchSessions(); }, []);
   const fetchSessions = async () => {
     try {
       const res = await fetch(`${API_URL}/sessions`);
-      if (res.ok) {
-        const data = await res.json();
-        setSessions(data); // The server is now the source of truth
-      }
-    } catch (err) {
-      console.error("Failed to fetch sessions", err);
-    }
+      if (res.ok) setSessions(await res.json());
+    } catch (e) { console.error(e); }
   };
 
-  // 2. Save Logic (Refreshes list after save)
-  const saveSession = async (): Promise<string | null> => {
+  // --- SAVE LOGIC (Update vs Create) ---
+  const saveSession = async (forceNew: boolean = false): Promise<string | null> => {
     try {
+      // Determine ID to send: if we have a serverId and !forceNew, use it.
+      const idToSend = (activeTab.serverId && !forceNew) ? activeTab.serverId : "";
+
       const res = await fetch(`${API_URL}/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ configs: config }),
+        body: JSON.stringify({ 
+          id: idToSend, // Backend will update if this exists
+          configs: config 
+        }),
       });
+      
       const data = await res.json();
-      
-      // Refresh list from server to get the new item with server-generated date
-      await fetchSessions();
-      
-      return data.id;
-    } catch (err) {
-      console.error("Save failed", err);
-      return null;
-    }
+      const savedId = data.id;
+
+      // Update Tab State: It is now "Saved"
+      setTabs(prev => prev.map(t => 
+        t.id === activeTabId ? { ...t, serverId: savedId, title: `Saved (${savedId})` } : t
+      ));
+
+      await fetchSessions(); // Refresh history list
+      return savedId;
+    } catch (err) { return null; }
   };
 
-  // 3. Load Logic
+  // --- LOAD LOGIC ---
   const loadSession = async (sessionId: string): Promise<boolean> => {
     try {
       const res = await fetch(`${API_URL}/load?id=${sessionId}`);
       if (!res.ok) return false;
       const loadedConfig = await res.json();
-      setConfig(loadedConfig);
+      
+      // Load into ACTIVE tab
+      setTabs(prev => prev.map(t => 
+        t.id === activeTabId ? { ...t, config: loadedConfig, serverId: sessionId, title: `Saved (${sessionId})` } : t
+      ));
       return true;
-    } catch (err) {
-      return false;
-    }
+    } catch (err) { return false; }
   };
 
-  // 4. Delete Logic
-  const deleteSession = async (id: string) => {
-    try {
-        await fetch(`${API_URL}/delete?id=${id}`, { method: 'DELETE' });
-        await fetchSessions(); // Refresh list
-    } catch (err) {
-        console.error(err);
-    }
-  };
-
-  // --- CONFIG HELPERS ---
-  const validateAndSetConfig = (type: DeviceType, newValue: number, currentConfig: Record<DeviceType, number>) => {
+  // --- CONFIG VALIDATION (Standard) ---
+  const validateAndSetConfig = (type: DeviceType, newValue: number) => {
     const safeValue = Math.max(0, newValue);
-    const tempConfig = { ...currentConfig, [type]: safeValue };
+    const tempConfig = { ...config, [type]: safeValue };
+
     let totalBatteries = 0;
     (Object.keys(tempConfig) as DeviceType[]).forEach(key => {
       if (key !== 'Transformer') totalBatteries += tempConfig[key];
     });
     const minTransformers = Math.floor(totalBatteries / 2);
-    if (type === 'Transformer') {
-      if (safeValue < minTransformers) return currentConfig;
-    } else {
-      tempConfig.Transformer = minTransformers;
-    }
-    localStorage.setItem('tesla-site-config', JSON.stringify(tempConfig));
-    return tempConfig;
+
+    if (type === 'Transformer' && safeValue < minTransformers) return;
+    if (type !== 'Transformer') tempConfig.Transformer = minTransformers;
+
+    updateActiveTabConfig(tempConfig);
   };
 
-  const updateConfig = (type: DeviceType, delta: number) => {
-    setConfig(prev => validateAndSetConfig(type, (prev[type] || 0) + delta, prev));
-  };
+  const updateConfig = (type: DeviceType, delta: number) => validateAndSetConfig(type, (config[type] || 0) + delta);
+  const setDeviceCount = (type: DeviceType, value: number) => validateAndSetConfig(type, value);
 
-  const setDeviceCount = (type: DeviceType, value: number) => {
-    setConfig(prev => validateAndSetConfig(type, value, prev));
-  };
-
+  // --- FETCH LAYOUT ---
   const fetchLayout = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/calculate`, {
@@ -124,11 +152,8 @@ export function useSiteLayout() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ configs: config }),
       });
-      const data = await res.json();
-      setLayout(data);
-    } catch (err) {
-      console.error(err);
-    }
+      setLayout(await res.json());
+    } catch (err) { console.error(err); }
   }, [config]);
 
   useEffect(() => {
@@ -136,5 +161,13 @@ export function useSiteLayout() {
     return () => clearTimeout(timer);
   }, [fetchLayout]);
 
-  return { config, layout, updateConfig, setDeviceCount, saveSession, loadSession, deleteSession, sessions };
+  return { 
+    tabs, activeTabId, setActiveTabId, addTab, closeTab, renameTab, // Tab Exports
+    config, layout, updateConfig, setDeviceCount, 
+    saveSession, loadSession, deleteSession: async (id: string) => { 
+        await fetch(`${API_URL}/delete?id=${id}`, { method: 'DELETE' }); 
+        fetchSessions(); 
+    }, 
+    sessions 
+  };
 }

@@ -6,9 +6,10 @@ interface Props {
   onSave: () => Promise<string | null>;
   onLoad: (id: string) => Promise<boolean>;
   onDelete: (id: string) => void;
+  onNew: () => void; // <--- NEW PROP
 }
 
-export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDelete }) => {
+export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDelete, onNew }) => {
   const [manualId, setManualId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
@@ -36,22 +37,43 @@ export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDe
 
   return (
     <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px dashed var(--border)' }}>
-      {/* Header */}
+      {/* HEADER WITH ACTIONS */}
       <div className="panel-header" style={{ padding: '0 0 10px 0', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>Saved Layouts</span>
-        <button
-          onClick={handleSaveClick}
-          disabled={isSaving}
-          style={{
-            padding: '4px 10px', cursor: isSaving ? 'wait' : 'pointer',
-            background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, opacity: isSaving ? 0.7 : 1
-          }}
-        >
-          {isSaving ? "Saving..." : "+ Save Current"}
-        </button>
+        
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {/* NEW LAYOUT BUTTON */}
+          <button
+            onClick={() => {
+              if (window.confirm("Start a new layout? Unsaved changes will be lost.")) {
+                onNew();
+              }
+            }}
+            style={{
+              padding: '4px 10px', cursor: 'pointer',
+              background: 'transparent', border: '1px solid var(--border)', 
+              color: 'var(--text-main)', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600
+            }}
+            title="Clear current layout"
+          >
+            + New
+          </button>
+
+          {/* SAVE BUTTON */}
+          <button
+            onClick={handleSaveClick}
+            disabled={isSaving}
+            style={{
+              padding: '4px 10px', cursor: isSaving ? 'wait' : 'pointer',
+              background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, opacity: isSaving ? 0.7 : 1
+            }}
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+        </div>
       </div>
 
-      {/* List */}
+      {/* LIST OF SAVED SESSIONS */}
       <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {safeSessions.length === 0 ? (
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'center', padding: '10px' }}>
@@ -69,7 +91,7 @@ export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDe
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{session.summary}</div>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); if(window.confirm('Delete?')) onDelete(session.id); }}
+                  onClick={(e) => { e.stopPropagation(); if(window.confirm('Delete this saved session?')) onDelete(session.id); }}
                   style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '16px', padding: '0 8px' }}
                 >
                   ×
@@ -80,10 +102,10 @@ export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDe
         )}
       </div>
 
-      {/* Manual Load */}
+      {/* MANUAL LOAD */}
       <div style={{ marginTop: '15px', display: 'flex', gap: '5px', alignItems: 'center' }}>
         <input
-          placeholder="Or enter ID manually..."
+          placeholder="Enter ID manually..."
           value={manualId}
           onChange={(e) => setManualId(e.target.value)}
           style={{ flex: 1, padding: '6px', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.75rem', background: 'transparent', color: 'var(--text-main)' }}

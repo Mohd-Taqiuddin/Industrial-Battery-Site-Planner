@@ -11,32 +11,32 @@ import (
 	"time"
 )
 
-// Request Payload
+// Request Payload (Added ID field for updates)
 type LayoutRequest struct {
+	ID      string             `json:"id,omitempty"` // Optional: If provided, we update this session
 	Configs map[DeviceType]int `json:"configs"`
 }
 
-// Session Object (Stores everything needed for the list)
+// Session Object
 type Session struct {
-	ID      string             `json:"id"`
-	Config  map[DeviceType]int `json:"config"`
-	Date    string             `json:"date"`
-	Summary string             `json:"summary"`
-	UnixTime int64             `json:"unix_time"` // For sorting
+	ID       string             `json:"id"`
+	Config   map[DeviceType]int `json:"config"`
+	Date     string             `json:"date"`
+	Summary  string             `json:"summary"`
+	UnixTime int64              `json:"unix_time"`
 }
 
 const DATA_FILE = "/data/sessions.json"
 var fileMutex sync.Mutex
 
-// --- FILE OPERATIONS ---
-
+// --- HELPERS ---
 func loadSessions() map[string]Session {
+	store := make(map[string]Session)
 	file, err := os.ReadFile(DATA_FILE)
-	if err != nil {
-		return make(map[string]Session)
+	if err == nil {
+		_ = json.Unmarshal(file, &store)
 	}
-	var store map[string]Session
-	json.Unmarshal(file, &store)
+	if store == nil { store = make(map[string]Session) }
 	return store
 }
 
@@ -47,6 +47,7 @@ func saveSessions(store map[string]Session) {
 	os.WriteFile(DATA_FILE, data, 0644)
 }
 
+// --- SERVER ---
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	os.MkdirAll("/data", 0755)
@@ -68,7 +69,7 @@ func main() {
 		json.NewEncoder(w).Encode(layout)
 	})
 
-	// 2. SAVE (Persistent)
+	// 2. SAVE (Create OR Update)
 	mux.HandleFunc("/api/save", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == "OPTIONS" { return }
@@ -79,78 +80,72 @@ func main() {
 			return
 		}
 
-		// Create Session Data
-		id := fmt.Sprintf("SAVE-%d", rand.Intn(99999))
-		totalItems := 0
-		for _, v := range req.Configs { totalItems += v }
-		
-		session := Session{
-			ID:      id,
-			Config:  req.Configs,
-			Date:    time.Now().Format("01/02/2006, 03:04 PM"),
-			UnixTime: time.Now().Unix(),
-			Summary: fmt.Sprintf("%d Devices", totalItems),
+		// LOGIC: If ID is provided, use it. Else, generate new.
+		sessionID := req.ID
+		if sessionID == "" {
+			sessionID = fmt.Sprintf("SAVE-%d", rand.Intn(99999))
 		}
 
-		// Save to Disk
+		totalItems := 0
+		for _, v := range req.Configs { totalItems += v }
+
+		newSession := Session{
+			ID:       sessionID,
+			Config:   req.Configs,
+			Date:     time.Now().Format("01/02/2006, 03:04 PM"),
+			Summary:  fmt.Sprintf("%d Devices", totalItems),
+			UnixTime: time.Now().Unix(),
+		}
+
 		store := loadSessions()
-		store[id] = session
+		store[sessionID] = newSession
 		saveSessions(store)
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"id": id})
+		json.NewEncoder(w).Encode(map[string]string{"id": sessionID})
 	})
 
-	// 3. LIST ALL (New Endpoint!)
+	// 3. LIST SESSIONS
 	mux.HandleFunc("/api/sessions", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == "OPTIONS" { return }
-
-		store := loadSessions()
 		
-		// Convert Map to Slice for JSON
+		store := loadSessions()
 		var list []Session
-		for _, s := range store {
-			list = append(list, s)
-		}
-
-		// Sort by Newest First
-		sort.Slice(list, func(i, j int) bool {
-			return list[i].UnixTime > list[j].UnixTime
-		})
+		for _, s := range store { list = append(list, s) }
+		sort.Slice(list, func(i, j int) bool { return list[i].UnixTime > list[j].UnixTime })
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(list)
 	})
 
-	// 4. LOAD SINGLE
+	// 4. LOAD SESSION
 	mux.HandleFunc("/api/load", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == "OPTIONS" { return }
-
+		
 		id := r.URL.Query().Get("id")
 		store := loadSessions()
-		
-		if session, ok := store[id]; ok {
+		if session, exists := store[id]; exists {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(session.Config)
 		} else {
-			http.Error(w, "Session not found", http.StatusNotFound)
+			http.Error(w, "Not found", http.StatusNotFound)
 		}
 	})
-    
-    // 5. DELETE
-    mux.HandleFunc("/api/delete", func(w http.ResponseWriter, r *http.Request) {
-        enableCors(w)
-        if r.Method == "OPTIONS" { return }
-        
-        id := r.URL.Query().Get("id")
-        store := loadSessions()
-        delete(store, id)
-        saveSessions(store)
-        
-        w.WriteHeader(http.StatusOK)
-    })
+
+	// 5. DELETE
+	mux.HandleFunc("/api/delete", func(w http.ResponseWriter, r *http.Request) {
+		enableCors(w)
+		if r.Method == "OPTIONS" { return }
+		if r.Method != "DELETE" { return }
+
+		id := r.URL.Query().Get("id")
+		store := loadSessions()
+		delete(store, id)
+		saveSessions(store)
+		w.WriteHeader(http.StatusOK)
+	})
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", mux)
