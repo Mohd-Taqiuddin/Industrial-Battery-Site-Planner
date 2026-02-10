@@ -8,6 +8,28 @@
   --grid-line: #e0e0e0;
   --shadow: 0 4px 12px rgba(0,0,0,0.05);
   --viz-bg: #ffffff;
+
+  /* BLUEPRINT - LIGHT MODE */
+  --blueprint-bg: #ffffff;
+  --blueprint-grid: #e5e7eb;  /* Light Grey Lines */
+  --blueprint-border: #333333;
+  --ruler-bg: #f3f4f6;
+  --ruler-text: #6b7280;
+  --ruler-border: #d1d5db;
+
+  --bg-app: #f3f4f6;
+  --bg-panel: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  
+  /* --- BLUEPRINT SPECIFIC VARS --- */
+  --viz-bg: #e5e5e5;          /* The "Table" color (Light Grey) */
+  --blueprint-bg: #ffffff;    /* The "Paper" color (White) */
+  --blueprint-grid: #e5e7eb;  /* Grid Lines */
+  --blueprint-border: #d1d5db;
+  
 }
 
 [data-theme='dark'] {
@@ -20,6 +42,55 @@
   --grid-line: rgba(255,255,255,0.05);
   --shadow: 0 4px 12px rgba(0,0,0,0.3);
   --viz-bg: #0b1120;
+
+  /* BLUEPRINT - DARK MODE (CAD Style) */
+  --blueprint-bg: #18181b;    /* Very Dark Slate */
+  --blueprint-grid: rgba(255,255,255,0.1); /* Faint White Lines */
+  --blueprint-border: #52525b;
+  --ruler-bg: #27272a;
+  --ruler-text: #9ca3af;
+  --ruler-border: #3f3f46;
+
+  /* BLUEPRINT - DARK MODE */
+  --blueprint-bg: #1e1e1e;    
+  --blueprint-grid: rgba(255,255,255,0.08); 
+  --blueprint-border: #52525b;
+
+  --bg-app: #09090b;       /* Zinc-950 */
+  --bg-panel: #18181b;     /* Zinc-900 */
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --border: #27272a;
+  --accent: #3b82f6;       /* Brighter Blue for Dark Mode */
+  
+  /* --- BLUEPRINT DARK MODE (CAD STYLE) --- */
+  --viz-bg: #000000;          /* The "Table" is pure black */
+  --blueprint-bg: #1e1e1e;    /* The "Paper" is Dark Grey (VS Code style) */
+  --blueprint-grid: rgba(255,255,255,0.08); /* Faint white lines */
+  --blueprint-border: #3f3f46;
+  
+  /* Ruler Dark Mode */
+  --ruler-bg: #18181b;
+  --ruler-text: #9ca3af;
+  --ruler-border: #27272a;
+}
+
+/* --- RULER CLASSES (Updates for Dark Mode) --- */
+.ruler-x {
+  background: var(--ruler-bg) !important;
+  border-bottom: 1px solid var(--ruler-border) !important;
+  color: var(--ruler-text) !important;
+}
+
+.ruler-y {
+  background: var(--ruler-bg) !important;
+  border-right: 1px solid var(--ruler-border) !important;
+  color: var(--ruler-text) !important;
+}
+
+/* Fix ruler tick marks (the little lines) */
+.ruler-tick {
+  background-color: var(--ruler-border) !important;
 }
 
 * { box-sizing: border-box; }
@@ -153,6 +224,34 @@ html, body, #root {
   display: flex;
   justify-content: center;
   /* Allow margin:auto to center content */
+
+  flex: 1;
+  background-color: var(--viz-bg); /* <--- THIS WAS THE ISSUE */
+  
+  /* Background grid pattern for the "Table" (Optional, makes it look technical) */
+  background-image: 
+    radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 20px 20px;
+  
+  position: relative;
+  overflow: auto;
+  display: flex;
+}
+
+/* RULER OVERRIDES */
+.ruler-x {
+  background: var(--ruler-bg) !important;
+  border-bottom: 1px solid var(--ruler-border) !important;
+  color: var(--ruler-text) !important;
+}
+.ruler-y {
+  background: var(--ruler-bg) !important;
+  border-right: 1px solid var(--ruler-border) !important;
+  color: var(--ruler-text) !important;
+}
+.ruler-tick {
+  background: var(--ruler-text) !important;
+  opacity: 0.3;
 }
 
 /* --- RULERS (The numbers on the side) --- */
@@ -229,15 +328,6 @@ html, body, #root {
   border-radius: 50%; /* Keep circular */
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-
-/* Transformer "Icon" look */
-.bg-Transformer::after {
-  content: "⚡";
-  font-size: 10px;
-}
-
-
-
 
 /* Legend & Colors */
 .legend { display: flex; gap: 12px; padding: 10px; background: var(--bg-panel); border-bottom: 1px solid var(--border); font-size: 0.75rem; flex-wrap: wrap; }
