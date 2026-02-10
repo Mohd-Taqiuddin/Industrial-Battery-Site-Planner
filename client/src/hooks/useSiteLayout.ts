@@ -22,9 +22,9 @@ export function useSiteLayout() {
   const [config, setConfig] = useState<Record<DeviceType, number>>({
     MegapackXL: 0, Megapack2: 0, Megapack: 0, PowerPack: 0, Transformer: 0,
   });
+
   const [layout, setLayout] = useState<LayoutResponse | null>(null);
 
-  // Persistence
   useEffect(() => {
     const saved = localStorage.getItem('tesla-site-config');
     if (saved) setConfig(JSON.parse(saved));
@@ -34,6 +34,8 @@ export function useSiteLayout() {
     setConfig(prev => {
       const newVal = Math.max(0, (prev[type] || 0) + delta);
       const newConfig = { ...prev, [type]: newVal };
+      
+      // We save immediately, but we will sync with backend response below
       localStorage.setItem('tesla-site-config', JSON.stringify(newConfig));
       return newConfig;
     });
@@ -48,12 +50,17 @@ export function useSiteLayout() {
       });
       const data = await res.json();
       setLayout(data);
+
+      // OPTIONAL: If backend forced transformer count up, sync UI?
+      // Actually, it's better to keep UI input separate from "Applied" count
+      // so the user knows what THEY typed vs what is REQUIRED.
+      // We will leave config as is, but display data.transformers_count in stats.
+      
     } catch (err) {
       console.error(err);
     }
   }, [config]);
 
-  // Debounce
   useEffect(() => {
     const timer = setTimeout(fetchLayout, 300);
     return () => clearTimeout(timer);
