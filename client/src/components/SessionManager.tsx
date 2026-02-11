@@ -6,7 +6,7 @@ interface Props {
   onSave: () => Promise<string | null>;
   onLoad: (id: string) => Promise<boolean>;
   onDelete: (id: string) => void;
-  onNew: () => void; // <--- NEW PROP
+  onNew: () => void;
 }
 
 export const SessionManager: React.FC<Props> = ({ sessions, onSave, onLoad, onDelete, onNew }) => {

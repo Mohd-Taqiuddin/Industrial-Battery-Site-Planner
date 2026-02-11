@@ -8,57 +8,89 @@ import (
 	"time"
 )
 
+func enableCors(w http.ResponseWriter) {
+	// Permissive for demo/take-home ease of use
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
+// sendJSONError ensures even our error messages follow the API contract
+func sendJSONError(w http.ResponseWriter, message string, code int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": message})
+}
+
+// --- HTTP HANDLERS ---
+
 func HandleCalculate(w http.ResponseWriter, r *http.Request) {
 	enableCors(w)
-	if r.Method == "OPTIONS" { return }
+	if r.Method == "OPTIONS" {
+		return
+	}
 
+	// Limit Request Size to prevent Memory Exhaustion
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_BODY_SIZE)
 
 	var req LayoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+		sendJSONError(w, "Invalid request body: check your JSON format", http.StatusBadRequest)
 		return
 	}
 
+	// Server-side validation (Security Gatekeeper)
 	if err := ValidateConfig(req.Configs); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	layout := GenerateLayout(req.Configs)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(layout)
+	if err := json.NewEncoder(w).Encode(layout); err != nil {
+		fmt.Printf("[ERROR] Failed to encode layout: %v\n", err)
+	}
 }
 
 func HandleSave(w http.ResponseWriter, r *http.Request) {
 	enableCors(w)
-	if r.Method == "OPTIONS" { return }
+	if r.Method == "OPTIONS" {
+		return
+	}
 
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_BODY_SIZE)
 
 	var req LayoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+		sendJSONError(w, "Invalid JSON body", http.StatusBadRequest)
 		return
 	}
-	
+
 	if err := ValidateConfig(req.Configs); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	sessionID := req.ID
-	// Auto-generate ID if missing, retry on collision
 	if sessionID == "" {
+		// Collision-resistant ID generation loop
 		for {
 			sessionID = GenerateID()
-			store := LoadSessions()
-			if _, exists := store[sessionID]; !exists { break }
+			store, err := LoadSessions()
+			if err != nil {
+				sendJSONError(w, "Database access error during ID generation", http.StatusInternalServerError)
+				return
+			}
+			if _, exists := store[sessionID]; !exists {
+				break
+			}
 		}
 	}
 
 	totalItems := 0
-	for _, v := range req.Configs { totalItems += v }
+	for _, v := range req.Configs {
+		totalItems += v
+	}
 
 	newSession := Session{
 		ID:       sessionID,
@@ -68,57 +100,91 @@ func HandleSave(w http.ResponseWriter, r *http.Request) {
 		UnixTime: time.Now().Unix(),
 	}
 
+	// Atomic save with full error handling
 	if err := SaveSession(newSession); err != nil {
-		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		fmt.Printf("[ERROR] SaveSession failed: %v\n", err)
+		sendJSONError(w, "Critical: Failed to save session to disk", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"id": sessionID})
+	_ = json.NewEncoder(w).Encode(map[string]string{"id": sessionID})
 }
 
 func HandleListSessions(w http.ResponseWriter, r *http.Request) {
 	enableCors(w)
-	if r.Method == "OPTIONS" { return }
+	if r.Method == "OPTIONS" {
+		return
+	}
 
-	store := LoadSessions()
+	store, err := LoadSessions()
+	if err != nil {
+		fmt.Printf("[ERROR] ListSessions failed: %v\n", err)
+		sendJSONError(w, "Internal storage error: check server logs", http.StatusInternalServerError)
+		return
+	}
+
 	var list []Session
-	for _, s := range store { list = append(list, s) }
-	sort.Slice(list, func(i, j int) bool { return list[i].UnixTime > list[j].UnixTime })
+	for _, s := range store {
+		list = append(list, s)
+	}
+
+	// Sort by newest first
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].UnixTime > list[j].UnixTime
+	})
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(list)
+	_ = json.NewEncoder(w).Encode(list)
 }
 
 func HandleLoadSession(w http.ResponseWriter, r *http.Request) {
 	enableCors(w)
-	if r.Method == "OPTIONS" { return }
+	if r.Method == "OPTIONS" {
+		return
+	}
 
 	id := r.URL.Query().Get("id")
-	store := LoadSessions()
+	if id == "" {
+		sendJSONError(w, "Missing session ID parameter", http.StatusBadRequest)
+		return
+	}
+
+	store, err := LoadSessions()
+	if err != nil {
+		sendJSONError(w, "Failed to load session store", http.StatusInternalServerError)
+		return
+	}
+
 	if session, exists := store[id]; exists {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(session.Config)
+		_ = json.NewEncoder(w).Encode(session.Config)
 	} else {
-		http.Error(w, "Not found", http.StatusNotFound)
+		sendJSONError(w, "Configuration session not found", http.StatusNotFound)
 	}
 }
 
 func HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
 	enableCors(w)
-	if r.Method == "OPTIONS" { return }
-	if r.Method != "DELETE" { return }
-
-	id := r.URL.Query().Get("id")
-	if err := DeleteSession(id); err != nil {
-		http.Error(w, "Failed to delete", http.StatusInternalServerError)
+	if r.Method == "OPTIONS" {
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-}
+	if r.Method != http.MethodDelete {
+		sendJSONError(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-func enableCors(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		sendJSONError(w, "Missing session ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := DeleteSession(id); err != nil {
+		fmt.Printf("[ERROR] Deletion of %s failed: %v\n", id, err)
+		sendJSONError(w, "Could not remove session from storage", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
