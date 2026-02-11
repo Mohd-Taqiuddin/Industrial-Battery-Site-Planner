@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	if err := os.MkdirAll("/data", 0755); err != nil {
+	if err := os.MkdirAll("./data", 0755); err != nil {
 		fmt.Printf("Fatal: Could not create data directory: %v\n", err)
 		os.Exit(1)
 	}
@@ -25,15 +25,17 @@ func main() {
 	// Logging
 	loggingHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		fmt.Printf("[%s] %s %s\n", r.Method, r.URL.Path, r.RemoteAddr)
-		
 		mux.ServeHTTP(w, r)
-		
-		fmt.Printf("   └─ Completed in %v\n", time.Since(start))
+		fmt.Printf("[%s] %s %s - %v\n", r.Method, r.URL.Path, r.RemoteAddr, time.Since(start))
 	})
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port if not specified
+	}
+
 	server := &http.Server{
-		Addr: ":8080",
+		Addr: ":" + port,
 		Handler: http.TimeoutHandler(loggingHandler, 5*time.Second, "Server Timeout"),
 		
 		// TCP/HTTP Level Timeouts
@@ -43,7 +45,7 @@ func main() {
 		ReadHeaderTimeout: 2 * time.Second,  // Max time to read just the headers (prevents Slowloris)
 	}
 
-	fmt.Println(" Tesla Industrial Battery Server running on :8080")
+	fmt.Println(" Tesla Industrial Battery Server running on :" + port)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Printf("Server failed: %v\n", err)
 	}

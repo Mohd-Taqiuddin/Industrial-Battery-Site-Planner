@@ -2,7 +2,7 @@ package main
 
 // CONFIGURATION
 const (
-	DATA_FILE     = "/data/sessions.json"
+	DATA_FILE     = "./data/sessions.json"
 	MAX_BODY_SIZE = 1024 * 1024 // 1MB Limit
 )
 

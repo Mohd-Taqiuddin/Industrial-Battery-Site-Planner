@@ -12,7 +12,7 @@ func enableCors(w http.ResponseWriter) {
 	// Permissive for demo... ease of use
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 }
 
 func sendJSONError(w http.ResponseWriter, message string, code int) {
