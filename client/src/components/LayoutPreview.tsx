@@ -10,12 +10,7 @@ interface Props {
 
 export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeight, onClear }) => {
 
-  // console.log("DEBUG: LayoutPreview Entry", { 
-  //   devicesIsArray: Array.isArray(devices), 
-  //   count: devices?.length 
-  // });
-
-  // Increased scale for better visibility and print-friendliness
+  // Increase scale for better visibility
   const PIXELS_PER_FT = 6.5; 
   
   const vizWidth = totalWidth * PIXELS_PER_FT;
@@ -30,8 +25,18 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
 
   return (
     <div className="panel fill">
-      <div className="panel-header" style={{ borderBottom: 'none' }}>
-        Site Layout Blueprint
+      <div className="panel-header" style={{ 
+      borderBottom: 'none',
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      alignItems: 'center',
+      padding: '10px 20px',
+      width: '100%',
+      boxSizing: 'border-box' 
+      }}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ margin: 0 }}>Site Layout Blueprint</h3>
+        </div>
         <span style={{ fontSize: '0.7rem', opacity: 0.7, fontFamily: 'monospace' }}>Scale: 10ft grid</span>
       </div>
 
@@ -45,7 +50,6 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
         zIndex: 10
       }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Site Blueprint</h2>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>
             {totalWidth}ft × {totalHeight}ft | {devices.length} Devices
           </span>
@@ -59,7 +63,10 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
             fontSize: '0.75rem',
             borderRadius: '6px',
             cursor: 'pointer',
-            fontWeight: 600
+            fontWeight: 600,
+            width: 'auto',        // Ensure it only takes needed width
+            minWidth: 'fit-content',
+            whiteSpace: 'nowrap'
           }}
         >
           <span style={{ marginRight: '6px' }}>↺</span> Clear Grid
@@ -148,6 +155,31 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
                 `,
                 backgroundSize: `${50 * PIXELS_PER_FT}px ${50 * PIXELS_PER_FT}px`
               }}></div>
+
+              {devices.length === 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  color: 'var(--text-muted)',
+                  textAlign: 'center',
+                  opacity: 0.5,
+                  pointerEvents: 'none',
+                  zIndex: 1 // Keep it above the grid but below everything else
+                }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚡</div>
+                  <div style={{ 
+                    fontWeight: 600, 
+                    fontSize: '0.8rem', 
+                    textTransform: 'uppercase', 
+                    letterSpacing: '0.15em',
+                    fontFamily: 'monospace' 
+                  }}>
+                    Add devices to begin layout
+                  </div>
+                </div>
+              )}
 
               {devices?.map((d) => (
                 <div

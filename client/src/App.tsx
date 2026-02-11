@@ -5,14 +5,25 @@ import { Navbar } from './components/Navbar';
 import { ConfigPanel } from './components/ConfigPanel';
 import { StatsPanel } from './components/StatsPanel';
 import { LayoutPreview } from './components/LayoutPreview';
-import type { DeviceType } from './types';
 
 export default function App() {
   
   const { 
-    tabs, activeTabId, setActiveTabId, addTab, closeTab, renameTab, // Tab Logic
-    config, layout, updateConfig, setDeviceCount, 
-    saveSession, loadSession, deleteSession, sessions 
+    tabs, 
+    activeTabId, 
+    setActiveTabId, 
+    addTab, 
+    closeTab, 
+    renameTab,
+    config, 
+    layout, 
+    updateConfig, 
+    setDeviceCount, 
+    saveSession, 
+    loadSession, 
+    deleteSession, 
+    sessions, 
+    clearAllDevices 
   } = useSiteLayout();
   
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -41,12 +52,12 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-  const handleClear = () => {
-  if (window.confirm("Are you sure you want to clear the current design?")) {
-    const deviceTypes: DeviceType[] = ['MegapackXL', 'Megapack2', 'Megapack', 'PowerPack', 'Transformer'];
-    deviceTypes.forEach(type => setDeviceCount(type, 0));
-  }
-};
+//   const handleClear = () => {
+//   if (window.confirm("Are you sure you want to clear the current design?")) {
+//     const deviceTypes: DeviceType[] = ['MegapackXL', 'Megapack2', 'Megapack', 'PowerPack', 'Transformer'];
+//     deviceTypes.forEach(type => setDeviceCount(type, 0));
+//   }
+// };
 
   return (
     <div className="app-container">
@@ -81,7 +92,7 @@ export default function App() {
           devices={layout?.placed_devices || []} 
           totalWidth={layout?.total_width || 100}
           totalHeight={layout?.total_height || 100}
-          onClear={handleClear}
+          onClear={clearAllDevices}
         />
 
         {/* Right Panel: Metrics & BoM */}

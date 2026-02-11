@@ -8,32 +8,39 @@ interface Props {
 
 export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
 
-  // console.log("DEBUG: StatsPanel Entry", { layout, config });
-  // // Add this guard at the top to see if it fixes the crash
-  // if (!config) {
-  //   console.error("DEBUG: StatsPanel crashed - config is null!");
-  //   return <div>Loading Config...</div>;
-  // }
-
-
   const formatMoney = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
   
+  const formatCompact = (num: number, isMoney: boolean = false) => {
+    if (num >= 1000000) {
+      return (isMoney ? '$' : '') + (num / 1000000).toFixed(2) + 'M';
+    }
+    if (num >= 1000) {
+      return (isMoney ? '$' : '') + (num / 1000).toFixed(2) + 'k';
+    }
+    return (isMoney ? '$' : '') + num.toLocaleString();
+  };
+
   // Safe calculations to prevent crashes if layout is null
   const totalEnergy = layout?.total_energy || 0;
   const width = layout?.total_width || 0;
   const height = layout?.total_height || 0;
   const areaSqFt = width * height;
   
+  const totalCost = layout?.total_cost || 0;
+
   // Density Math
   // 1 Acre = 43,560 sq ft
   const densitySqFt = areaSqFt > 0 ? (totalEnergy / areaSqFt) : 0;
   const densityAcre = areaSqFt > 0 ? (totalEnergy / (areaSqFt / 43560)) : 0;
 
+  const costPerMWh = totalEnergy > 0 ? (totalCost / totalEnergy) : 0;
+
+  
+
   return (
     <div className="panel compact">
       <div className="panel-header">Project Metrics</div>
       <div className="panel-content">
-        
         {/* KPI Grid - Row 1 */}
         <div className="kpi-row">
           <div className="kpi-card">
@@ -66,6 +73,12 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
               {areaSqFt.toLocaleString()} sq ft
             </div>
           </div>
+          <div className="kpi-card" style={{ marginTop: '12px', background: 'rgba(61, 90, 254, 0.05)' }}>
+            <div className="kpi-label">Capital Efficiency</div>
+            <div className="kpi-value" style={{ color: 'var(--accent)' }}>
+              {formatMoney(costPerMWh)} <small>/ MWh</small>
+            </div>
+          </div>
         </div>
 
         <div className="panel-header" style={{padding: '0 0 0.5rem 0', border: 'none', fontSize: '0.75rem'}}>Bill of Materials</div>
@@ -95,8 +108,8 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
                       {type}
                     </td>
                     <td>{count}</td>
-                    <td>{itemArea * count} <small>sq ft</small></td>
-                    <td className="right">{formatMoney(count * DEVICE_SPECS[type].cost)}</td>
+                    <td>{formatCompact(itemArea * count)} <small>sq ft</small></td>
+                    <td className="right">{formatCompact(count * DEVICE_SPECS[type].cost)}</td>
                   </tr>
                 );
               }
@@ -121,8 +134,8 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
                   Transformer
                 </td>
                 <td>{layout?.transformers_count}</td>
-                <td>{100 * (layout?.transformers_count ?? 0)} <small>sq ft</small></td>
-                <td className="right">{formatMoney((layout?.transformers_count ?? 0) * DEVICE_SPECS['Transformer'].cost)}</td>
+                <td>{formatCompact(100 * (layout?.transformers_count ?? 0))} <small>sq ft</small></td>
+                <td className="right">{formatCompact((layout?.transformers_count ?? 0) * DEVICE_SPECS['Transformer'].cost)}</td>
               </tr>
             )}
           </tbody>

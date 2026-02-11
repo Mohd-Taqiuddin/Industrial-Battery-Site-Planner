@@ -47,7 +47,7 @@ func main() {
 		ReadHeaderTimeout: 2 * time.Second,  // Max time to read just the headers (prevents Slowloris)
 	}
 
-	fmt.Println("🚀 Tesla Industrial Battery Server running on :8080")
+	fmt.Println(" Tesla Industrial Battery Server running on :8080")
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Printf("Server failed: %v\n", err)
 	}

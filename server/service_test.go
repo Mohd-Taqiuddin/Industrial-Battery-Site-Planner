@@ -90,8 +90,8 @@ func TestGenerateLayout_TotalCost(t *testing.T) {
 
 	layout := GenerateLayout(config)
 
-	expectedCost := (2 * 80000) + (1 * 10000)
+	var expectedCost float64 = (2 * 80000) + (1 * 10000)
 	if layout.TotalCost != expectedCost {
-		t.Errorf("Expected TotalCost %d, got %d", expectedCost, layout.TotalCost)
+		t.Errorf("Expected TotalCost %.0f, got %.0f", expectedCost, layout.TotalCost)
 	}
 }

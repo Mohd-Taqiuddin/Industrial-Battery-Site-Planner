@@ -532,3 +532,12 @@ input[type=number] {
   background: #e2e8f0;
 }
 
+.panel-header button {
+  width: auto !important; 
+  flex-shrink: 0;         
+}
+
+.panel-header div:first-child {
+  flex-grow: 1;
+}
+

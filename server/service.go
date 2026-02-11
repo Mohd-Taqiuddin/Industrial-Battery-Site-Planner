@@ -28,13 +28,12 @@ func ValidateConfig(configs map[DeviceType]int) error {
 		if v < 0 {
 			return fmt.Errorf("negative count for %s", k)
 		}
-		if v > 1000 {
-			return fmt.Errorf("count for %s exceeds limit (1000)", k)
+		if v > 10000 {
+			return fmt.Errorf("count for %s exceeds limit (10000)", k)
 		}
 		
 		switch k {
 		case MegapackXL, Megapack2, Megapack, PowerPack, Transformer:
-			// OK
 		default:
 			return fmt.Errorf("unknown device type: %s", k)
 		}
