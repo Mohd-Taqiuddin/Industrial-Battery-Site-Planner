@@ -204,48 +204,16 @@ html, body, #root {
   transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
-/* .viz-container {
-  flex: 1;
-  background-color: var(--viz-bg);
-  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 20px 20px;
-  position: relative;
-  overflow: auto;
-
-  display: flex;
-  justify-content: center;
-} */
-
-/* Device Nodes */
-/* .device-node {
-  position: absolute;
-  color: white;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255,255,255,0.4);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  transition: all 0.4s ease;
-  white-space: nowrap;
-  z-index: 10;
-} */
-
 
 /* --- PROFESSIONAL BLUEPRINT GRID --- */
 .viz-container {
   flex: 1;
-  background-color: #f8f9fa; /* Very light technical grey */
-  
-  /* Technical Grid: 
-     - Small square = 10ft (50px)
-     - Large square = 50ft (250px) 
-  */
+  background-color: #f8f9fa; 
+
   background-image: 
     linear-gradient(var(--grid-line) 1px, transparent 1px), 
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 50px 50px; /* 10ft scale */
+  background-size: 50px 50px; 
   
   position: relative;
   overflow: auto;
