@@ -2,7 +2,7 @@
 
 A full-stack tool to design, validate, and visualize industrial battery sites. Built with **React + TypeScript** and a **Go** backend.
 
-##  Features
+## ⚡ Features
 - **Smart Configuration:** Add/remove Megapacks and PowerPacks with real-time validation.
 - **Auto-Constraint Enforcement:** Automatically ensures **1 Transformer per 2 Batteries**.
 - **Blueprint Visualization:** Interactive, grid-aligned site map that adheres to a **100ft max width**.
@@ -16,7 +16,7 @@ A full-stack tool to design, validate, and visualize industrial battery sites. B
 - **Export Tools:** CSV Export and Print-ready reports.
 
 
-##  Tech Stack
+## 🛠️ Tech Stack
 
 ### Frontend
 - **Framework:** React + TypeScript (Vite)
@@ -44,7 +44,7 @@ docker compose up --build
 Then open `http://localhost:8000`.
 
 
-## Project Structure
+## 📂 Project Structure
 
 ```text
 ├── client/
@@ -107,7 +107,7 @@ Response: The configuration object for that specific ID.
 
 Response: 200 OK.
 
-## Notes on calculations
+## 📝 Design Notes
 - Land dimensions are derived from the auto-generated layout bounding box (width <= 100 ft).
 - Energy density is provided in MWh per sq ft and MWh per acre.
 - Transformers: The system enforces a hard constraint of 1 Transformer for every 2 Batteries (rounded down).
