@@ -64,7 +64,7 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
             borderRadius: '6px',
             cursor: 'pointer',
             fontWeight: 600,
-            width: 'auto',        // Ensure it only takes needed width
+            width: 'auto',
             minWidth: 'fit-content',
             whiteSpace: 'nowrap'
           }}
@@ -131,22 +131,20 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
 
             {/* MAIN DRAWING BLUEPRINT */}
             <div style={{ 
-              position: 'relative', 
+              position: 'relative',
               width: `${vizWidth}px`, 
               height: `${vizHeight}px`,
               background: 'var(--blueprint-bg)', 
               border: '1px solid var(--blueprint-border)', 
-              boxShadow: '0 20px 50px rgba(0,0,0,0.15)', // Softer shadow for cleaner look
-              
-              // FIX 1: Professional Engineering Grid Pattern
+              boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
               backgroundImage: `
                 linear-gradient(var(--blueprint-grid) 1px, transparent 1px), 
                 linear-gradient(90deg, var(--blueprint-grid) 1px, transparent 1px)
               `,
-              backgroundSize: `${10 * PIXELS_PER_FT}px ${10 * PIXELS_PER_FT}px`, // 10ft Grid squares
+              backgroundSize: `${10 * PIXELS_PER_FT}px ${10 * PIXELS_PER_FT}px`,  // 10ft grid
             }}>
               
-              {/* Optional: Major Grid Lines (Every 50ft) for texture */}
+              {/* Major Grid Lines (Every 50ft) for texture */}
               <div style={{
                 position: 'absolute', inset: 0, pointerEvents: 'none',
                 backgroundImage: `

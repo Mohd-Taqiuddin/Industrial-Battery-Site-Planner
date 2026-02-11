@@ -49,7 +49,7 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Total Energy</div>
-            <div className="kpi-value">{totalEnergy.toFixed(1)} <small>MWh</small></div>
+            <div className="kpi-value">{totalEnergy.toFixed(2)} <small>MWh</small></div>
           </div>
         </div>
 
@@ -58,7 +58,7 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
           <div className="kpi-card">
             <div className="kpi-label">Energy Density</div>
             <div className="kpi-value" style={{fontSize: '1.1rem'}}>
-              {densityAcre.toFixed(1)} <small>MWh/acre</small>
+              {densityAcre.toFixed(2)} <small>MWh/acre</small>
             </div>
             <div style={{fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '4px'}}>
               {densitySqFt.toFixed(4)} MWh/sq ft
@@ -73,13 +73,18 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
               {areaSqFt.toLocaleString()} sq ft
             </div>
           </div>
-          <div className="kpi-card" style={{ marginTop: '12px', background: 'rgba(61, 90, 254, 0.05)' }}>
+        </div>
+
+        {/* KPI Grid - Row 3 (Capital Efficiency) */}
+        <div className="kpi-row" style={{marginBottom: '2rem'}}>
+          <div className="kpi-card">
             <div className="kpi-label">Capital Efficiency</div>
-            <div className="kpi-value" style={{ color: 'var(--accent)' }}>
+            <div className="kpi-value" style={{fontSize: '1.1rem'}}>
               {formatMoney(costPerMWh)} <small>/ MWh</small>
             </div>
           </div>
         </div>
+        
 
         <div className="panel-header" style={{padding: '0 0 0.5rem 0', border: 'none', fontSize: '0.75rem'}}>Bill of Materials</div>
         
@@ -116,11 +121,10 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
               return null;
             })}
             
-            {/* TRANSFORMER ROW - With Fixed Icon */}
+            {/* TRANSFORMER ROW */}
             {(layout?.transformers_count || 0) > 0 && (
               <tr>
                 <td>
-                  {/* ICON FIX: Blue Circle with Lightning Bolt */}
                   <span className="dot bg-Transformer" style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -130,7 +134,7 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
                     fontWeight: 'bold',
                     verticalAlign: 'middle',
                     marginRight: '8px'
-                  }}></span>
+                  }}>⚡</span>
                   Transformer
                 </td>
                 <td>{layout?.transformers_count}</td>
@@ -140,7 +144,6 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
             )}
           </tbody>
         </table>
-
       </div>
     </div>
   );

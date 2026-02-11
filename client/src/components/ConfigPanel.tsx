@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-// IMPORT STRICT TYPES
 import { type DeviceType, DEVICE_SPECS, type SessionSummary, type LayoutTab } from '../types';
 import { DeviceInputRow } from './DeviceInputRow';
 import { SessionManager } from './SessionManager';
@@ -23,31 +22,24 @@ export interface ConfigPanelProps {
   
   // ACTIONS
   onExport: () => void;
-  onSave: (forceNew?: boolean) => Promise<string | null>; // Matches Hook
+  onSave: (forceNew?: boolean) => Promise<string | null>;
   onLoad: (id: string) => Promise<boolean>;
   onDelete: (id: string) => void;
   
   // SESSIONS
-  sessions: SessionSummary[]; // Strict Type
+  sessions: SessionSummary[];
 }
 
 export const ConfigPanel: React.FC<ConfigPanelProps> = ({ 
   tabs, activeTabId, onSwitchTab, onAddTab, onCloseTab, onRenameTab,
   config, onUpdate, onSetCount, onExport, onSave, onLoad, onDelete, sessions 
 }) => {
-
-
-  // console.log("DEBUG: ConfigPanel Entry", { 
-  //   tabsCount: tabs?.length, 
-  //   sessionsCount: sessions?.length 
-  // });
   
   const [showSaveModal, setShowSaveModal] = useState(false);
   const activeTab = tabs.find(t => t.id === activeTabId);
 
   const handlePrint = () => window.print();
 
-  // SAVE CLICK Logic
   const handleSaveClick = async () => {
     // If it's a new unsaved design (no serverId), just save it.
     if (!activeTab?.serverId) {
@@ -116,11 +108,11 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
         currentId={activeTab?.serverId || ""}
         onClose={() => setShowSaveModal(false)}
         onOverwrite={() => {
-          onSave(false); // Update existing
+          onSave(false);
           setShowSaveModal(false);
         }}
         onSaveNew={() => {
-          onSave(true); // Create new ID
+          onSave(true);
           setShowSaveModal(false);
         }}
       />

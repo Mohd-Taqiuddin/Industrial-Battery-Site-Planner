@@ -52,13 +52,6 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-//   const handleClear = () => {
-//   if (window.confirm("Are you sure you want to clear the current design?")) {
-//     const deviceTypes: DeviceType[] = ['MegapackXL', 'Megapack2', 'Megapack', 'PowerPack', 'Transformer'];
-//     deviceTypes.forEach(type => setDeviceCount(type, 0));
-//   }
-// };
-
   return (
     <div className="app-container">
       <Navbar theme={theme} toggleTheme={toggleTheme} />
@@ -95,7 +88,7 @@ export default function App() {
           onClear={clearAllDevices}
         />
 
-        {/* Right Panel: Metrics & BoM */}
+        {/* Right Panel: Metrics */}
         <StatsPanel key={activeTabId} layout={layout} config={config} />
       </div>
     </div>

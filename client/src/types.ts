@@ -1,9 +1,7 @@
-// --- 1. CORE CONSTANTS ---
-
+// CORE CONSTANTs AND TYPES USED THROUGHOUT THE APP
 export type DeviceType = 'MegapackXL' | 'Megapack2' | 'Megapack' | 'PowerPack' | 'Transformer';
 
-// Device specs for the frontend (dimensions, cost, etc.)
-// I kept your values, including the -0.5 energy for Transformers
+// Device specs for the frontend (dimensions, cost, energy)
 export const DEVICE_SPECS: Record<DeviceType, { name: string; width: number; height: number; cost: number; energy: number }> = {
   MegapackXL: { name: "Megapack XL", width: 40, height: 10, cost: 120000, energy: 4 },
   Megapack2:  { name: "Megapack 2",  width: 30, height: 10, cost: 80000,  energy: 3 },
@@ -12,9 +10,7 @@ export const DEVICE_SPECS: Record<DeviceType, { name: string; width: number; hei
   Transformer:{ name: "Transformer", width: 10, height: 10, cost: 10000,  energy: -0.5 },
 };
 
-// --- 2. API RESPONSE TYPES ---
-// These must match the Go backend JSON exactly
-
+// API RESPONSE TYPES
 export interface Position {
   x: number;
   y: number;
@@ -37,15 +33,12 @@ export interface LayoutResponse {
   transformers_count: number;
 }
 
-// --- 3. APP STATE TYPES ---
-// These are used by React State (Tabs, Sessions)
-
+// APP STATE TYPES
 export interface LayoutTab {
   id: number;
   name: string;
   config: Record<DeviceType, number>;
   layout: LayoutResponse | null;
-  // CRITICAL ADDITION: This was missing and caused errors in ConfigPanel
   serverId?: string; 
 }
 

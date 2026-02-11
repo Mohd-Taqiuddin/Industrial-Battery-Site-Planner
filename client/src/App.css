@@ -334,9 +334,65 @@ html, body, #root {
 .kpi-card { background: var(--bg-app); padding: 1rem; border-radius: 8px; text-align: center; }
 .kpi-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; }
 .kpi-value { font-size: 1.3rem; font-weight: 300; color: var(--accent); }
-.bom-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+/* .bom-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .bom-table td { padding: 0.8rem 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.bom-table td.right { text-align: right; font-family: monospace; }
+.bom-table td.right { text-align: right; font-family: monospace; } */
+
+/* Bill of Materials Table - Strict Alignment */
+.bom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  table-layout: fixed;
+  margin-top: 5px;
+}
+
+.bom-table th {
+  color: var(--text-muted);
+  font-weight: 650;
+  padding: 8px 4px;
+  border-bottom: 2px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.bom-table td {
+  padding: 8px 4px;
+  border-bottom: 1px dashed var(--border);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* COLUMN 1: Device Name (Left Aligned) - 40% Width */
+.bom-table th:nth-child(1),
+.bom-table td:nth-child(1) {
+  text-align: left;
+  width: 30%;
+}
+
+/* COLUMN 2: Quantity (Center Aligned) - 15% Width */
+.bom-table th:nth-child(2),
+.bom-table td:nth-child(2) {
+  text-align: center;
+  width: 22%;
+}
+
+/* COLUMN 3: Footprint (Right Aligned) - 20% Width */
+.bom-table th:nth-child(3),
+.bom-table td:nth-child(3) {
+  text-align: right;
+  width: 25%;
+}
+
+/* COLUMN 4: Cost (Right Aligned) - 25% Width */
+.bom-table th:nth-child(4),
+.bom-table td:nth-child(4) {
+  text-align: right;
+  width: 23%;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-weight: 600;
+}
 
 @media print {
   @page { size: landscape; margin: 0.5cm; }
@@ -356,7 +412,7 @@ html, body, #root {
     overflow: visible; 
   }
 
-  /* Hide UI Elements */
+
   .navbar, .theme-btn, .stepper button, .print-hide {
     display: none !important;
   }

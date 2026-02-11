@@ -12,7 +12,14 @@ export const DeviceInputRow: React.FC<DeviceInputRowProps> = ({ type, count, onU
   const spec = DEVICE_SPECS[type];
 
   return (
-    <div className="config-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', paddingBottom: '0.8rem', borderBottom: '1px dashed var(--border)' }}>
+    <div className="config-row" style={{ 
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      alignItems: 'center', 
+      marginBottom: '0.8rem', 
+      paddingBottom: '0.8rem', 
+      borderBottom: '1px dashed var(--border)' 
+      }}>
       <div>
         <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{spec.name}</div>
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -25,8 +32,24 @@ export const DeviceInputRow: React.FC<DeviceInputRowProps> = ({ type, count, onU
         )}
       </div>
 
-      <div className="stepper" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-app)', padding: '4px', borderRadius: '6px' }}>
-        <button onClick={() => onUpdate(type, -1)} style={{ width: '28px', height: '28px', border: '1px solid var(--border)', background: 'var(--bg-panel)', borderRadius: '4px', cursor: 'pointer' }}>−</button>
+      <div className="stepper" style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '8px', 
+        background: 'var(--bg-app)', 
+        padding: '4px', 
+        borderRadius: '6px' 
+        }}>
+        <button 
+        onClick={() => onUpdate(type, -1)} 
+        style={{ 
+          width: '28px', 
+          height: '28px', 
+          border: '1px solid var(--border)', 
+          background: 'var(--bg-panel)', 
+          borderRadius: '4px', 
+          cursor: 'pointer' 
+          }}>−</button>
         
         <input
           type="number"
@@ -46,7 +69,15 @@ export const DeviceInputRow: React.FC<DeviceInputRowProps> = ({ type, count, onU
           }}
         />
         
-        <button onClick={() => onUpdate(type, 1)} style={{ width: '28px', height: '28px', border: '1px solid var(--border)', background: 'var(--bg-panel)', borderRadius: '4px', cursor: 'pointer' }}>+</button>
+        <button onClick={() => onUpdate(type, 1)} 
+        style={{
+           width: '28px', 
+           height: '28px', 
+           border: '1px solid var(--border)', 
+           background: 'var(--bg-panel)', 
+           borderRadius: '4px', 
+           cursor: 'pointer'
+            }}>+</button>
       </div>
     </div>
   );
