@@ -31,13 +31,16 @@ Then open `http://localhost:8000`.
 ```text
 ├── client/
 │   ├── src/
-│   │   ├── components/  # LayoutPreview, ConfigPanel, StatsPanel, NavBar, etc
-│   │   ├── hooks/       # useSiteLayout (State & API logic)
-│   │   └── types.ts     # Shared interfaces
+│   │   ├── components/         # LayoutPreview, ConfigPanel, StatsPanel, NavBar, etc
+│   │   ├── hooks/              # useSiteLayout (State & API logic)
+│   │   └── types.ts            # Shared interfaces
 ├── server/
-│   ├── main.go          # HTTP Server & Handlers
-│   ├── service.go       # Layout Algorithm & Constraints
-│   └── data/            # JSON persistence storage
+│   ├── main.go                 # HTTP Server & Handlers
+│   ├── service.go              # Layout Algorithm & Constraints
+│   ├── handlers.go             # Layout Algorithm & Constraints
+│   ├── store.go                # Layout Algorithm & Constraints
+│   ├── types.go                # Layout Algorithm & Constraints
+│   └── service_test.go         # JSON persistence storage
 └── docker-compose.yml
 ```
 ## API

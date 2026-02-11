@@ -1,14 +1,14 @@
 import React from 'react';
 import { type DeviceType, DEVICE_SPECS } from '../types';
 
-interface Props {
+export interface DeviceInputRowProps {
   type: DeviceType;
   count: number;
   onUpdate: (type: DeviceType, delta: number) => void;
   onSetCount: (type: DeviceType, value: number) => void;
 }
 
-export const DeviceInputRow: React.FC<Props> = ({ type, count, onUpdate, onSetCount }) => {
+export const DeviceInputRow: React.FC<DeviceInputRowProps> = ({ type, count, onUpdate, onSetCount }) => {
   const spec = DEVICE_SPECS[type];
 
   return (

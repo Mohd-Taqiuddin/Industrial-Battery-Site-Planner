@@ -51,7 +51,7 @@ type LayoutResponse struct {
 	PlacedDevices     []PlacedDevice `json:"placed_devices"`
 	TotalWidth        int            `json:"total_width"`
 	TotalHeight       int            `json:"total_height"`
-	TotalCost         int            `json:"total_cost"`
-	TotalEnergy       int            `json:"total_energy"`
+	TotalCost         float64            `json:"total_cost"`
+	TotalEnergy       float64            `json:"total_energy"`
 	TransformersCount int            `json:"transformers_count"`
 }

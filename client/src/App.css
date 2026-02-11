@@ -1,78 +1,89 @@
 :root {
-  --bg-app: #f4f4f4;
+  /* LIGHT THEME */
+  --bg-app: #f1f5f9;
   --bg-panel: #ffffff;
-  --text-main: #171a20;
-  --text-muted: #5c5e62;
-  --border: #e2e2e2;
-  --accent: #3e6ae1;
-  --grid-line: #e0e0e0;
-  --shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --viz-bg: #ffffff;
-
-  /* BLUEPRINT - LIGHT MODE */
-  --blueprint-bg: #ffffff;
-  --blueprint-grid: #e5e7eb;  /* Light Grey Lines */
-  --blueprint-border: #333333;
-  --ruler-bg: #f3f4f6;
-  --ruler-text: #6b7280;
-  --ruler-border: #d1d5db;
-
-  --bg-app: #f3f4f6;
-  --bg-panel: #ffffff;
-  --text-main: #1f2937;
-  --text-muted: #6b7280;
-  --border: #e5e7eb;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
   --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --danger: #ef4444;
   
-  /* --- BLUEPRINT SPECIFIC VARS --- */
-  --viz-bg: #e5e5e5;          /* The "Table" color (Light Grey) */
-  --blueprint-bg: #ffffff;    /* The "Paper" color (White) */
-  --blueprint-grid: #e5e7eb;  /* Grid Lines */
-  --blueprint-border: #d1d5db;
-  
+  /* BLUEPRINT LIGHT */
+  --blueprint-bg: #ffffff;
+  --blueprint-grid: rgba(0, 0, 0, 0.04);
+  --blueprint-border: #cbd5e1;
+  --ruler-text: #94a3b8;
 }
 
 [data-theme='dark'] {
-  --bg-app: #0f172a;
-  --bg-panel: #1e293b;
-  --text-main: #f8fafc;
+  /* DARK THEME */
+  --bg-app: #020617;
+  --bg-panel: #0f172a;
+  --text-main: #f1f5f9;
   --text-muted: #94a3b8;
-  --border: #334155;
+  --border: #1e293b;
   --accent: #3b82f6;
-  --grid-line: rgba(255,255,255,0.05);
-  --shadow: 0 4px 12px rgba(0,0,0,0.3);
-  --viz-bg: #0b1120;
+  --accent-hover: #60a5fa;
 
-  /* BLUEPRINT - DARK MODE (CAD Style) */
-  --blueprint-bg: #18181b;    /* Very Dark Slate */
-  --blueprint-grid: rgba(255,255,255,0.1); /* Faint White Lines */
-  --blueprint-border: #52525b;
-  --ruler-bg: #27272a;
-  --ruler-text: #9ca3af;
-  --ruler-border: #3f3f46;
+  /* BLUEPRINT DARK */
+  --blueprint-bg: #020617;
+  --blueprint-grid: rgba(255, 255, 255, 0.03);
+  --blueprint-border: #1e293b;
+  --ruler-text: #475569;
+}
 
-  /* BLUEPRINT - DARK MODE */
-  --blueprint-bg: #1e1e1e;    
-  --blueprint-grid: rgba(255,255,255,0.08); 
-  --blueprint-border: #52525b;
+.device-node {
+  transition: transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white; /* Text inside batteries stays white */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,0,0,0.1); /* Subtle edge */
+}
 
-  --bg-app: #09090b;       /* Zinc-950 */
-  --bg-panel: #18181b;     /* Zinc-900 */
-  --text-main: #f4f4f5;
-  --text-muted: #a1a1aa;
-  --border: #27272a;
-  --accent: #3b82f6;       /* Brighter Blue for Dark Mode */
-  
-  /* --- BLUEPRINT DARK MODE (CAD STYLE) --- */
-  --viz-bg: #000000;          /* The "Table" is pure black */
-  --blueprint-bg: #1e1e1e;    /* The "Paper" is Dark Grey (VS Code style) */
-  --blueprint-grid: rgba(255,255,255,0.08); /* Faint white lines */
-  --blueprint-border: #3f3f46;
-  
-  /* Ruler Dark Mode */
-  --ruler-bg: #18181b;
-  --ruler-text: #9ca3af;
-  --ruler-border: #27272a;
+/* Light mode specific device tweak */
+[data-theme='light'] .device-node {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, sans-serif;
+  margin: 0;
+}
+
+/* Layout Container */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr 300px; /* Precise widths */
+  gap: 1.5rem;
+  padding: 1.5rem;
+  height: calc(100vh - 80px);
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+  background: #cbd5e1; 
+  border-radius: 10px; 
 }
 
 /* --- RULER CLASSES (Updates for Dark Mode) --- */
@@ -174,6 +185,23 @@ html, body, #root {
   flex-direction: column;
   height: 100%;
   position: relative;
+}
+
+.btn-secondary {
+  background: var(--bg-app);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.btn-danger-hover:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.viz-container {
+  transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 /* .viz-container {
@@ -280,54 +308,33 @@ html, body, #root {
   font-family: monospace;
 }
 
-/* --- DEVICE "CABINET" LOOK --- */
 .device-node {
-  position: absolute;
-  color: white;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  border-radius: 3px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  /* Cabinet Styling */
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 3px;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.3), /* Highlight top */
-    0 2px 4px rgba(0,0,0,0.15); /* Drop Shadow */
-  
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  z-index: 10;
-  cursor: crosshair;
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0,0,0,0.3);
 }
 
 .device-node:hover {
-  transform: scale(1.05); /* Pop up slightly */
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  z-index: 30; /* Bring to front */
-  border-color: white;
+  transform: scale(1.05);
+  z-index: 10;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
 }
 
-/* --- REFINED COLORS (Gradients) --- */
-.bg-MegapackXL { 
-  background: linear-gradient(135deg, #ef4444, #b91c1c); 
-}
-.bg-Megapack2 { 
-  background: linear-gradient(135deg, #10b981, #047857); 
-}
-.bg-Megapack { 
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9); 
-}
-.bg-PowerPack { 
-  background: linear-gradient(135deg, #f59e0b, #b45309); 
-}
-.bg-Transformer { 
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
-  border-radius: 50%; /* Keep circular */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
+/* Specific colors for types */
+.bg-MegapackXL { background: #000000; color: #fff; }
+.bg-Megapack2  { background: #262626; color: #fff; }
+.bg-Megapack   { background: #404040; color: #fff; }
+.bg-PowerPack  { background: #525252; color: #fff; }
+.bg-Transformer { background: #3b82f6; color: #fff; }
 
 /* Legend & Colors */
 .legend { display: flex; gap: 12px; padding: 10px; background: var(--bg-panel); border-bottom: 1px solid var(--border); font-size: 0.75rem; flex-wrap: wrap; }
@@ -465,4 +472,63 @@ input[type=number] {
 .btn-primary { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; flex: 1; }
 .btn-secondary { background: var(--bg-app); border: 1px solid var(--border); color: var(--text-main); padding: 8px 16px; border-radius: 4px; cursor: pointer; flex: 1; }
 
+.btn-clear:hover {
+  background: var(--danger) !important;
+  color: white !important;
+}
+
+/* Add a subtle animation to the blueprint when it clears */
+.viz-container {
+  transition: opacity 0.3s ease;
+}
+
+.clear-grid-btn {
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1.5px solid #cbd5e1;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clear-grid-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(255, 82, 82, 0.05);
+  transform: translateY(-1px);
+}
+
+.action-btn {
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.action-btn.primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(61, 90, 254, 0.25);
+}
+
+.action-btn.primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.action-btn.secondary {
+  background: var(--bg-app);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+
+.action-btn.secondary:hover {
+  background: #e2e8f0;
+}
 

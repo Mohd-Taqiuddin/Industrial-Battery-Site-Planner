@@ -5,9 +5,16 @@ interface Props {
   devices: Array<{ id: string; type: DeviceType; width: number; height: number; position: { x: number; y: number } }>;
   totalWidth: number;
   totalHeight: number;
+  onClear: () => void;
 }
 
-export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeight }) => {
+export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeight, onClear }) => {
+
+  // console.log("DEBUG: LayoutPreview Entry", { 
+  //   devicesIsArray: Array.isArray(devices), 
+  //   count: devices?.length 
+  // });
+
   // Increased scale for better visibility and print-friendliness
   const PIXELS_PER_FT = 6.5; 
   
@@ -26,6 +33,37 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
       <div className="panel-header" style={{ borderBottom: 'none' }}>
         Site Layout Blueprint
         <span style={{ fontSize: '0.7rem', opacity: 0.7, fontFamily: 'monospace' }}>Scale: 10ft grid</span>
+      </div>
+
+      <div className="panel-header" style={{ 
+        padding: '1rem 1.5rem',
+        background: 'var(--bg-panel)',
+        borderBottom: '1px solid var(--border)',
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        zIndex: 10
+      }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Site Blueprint</h2>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+            {totalWidth}ft × {totalHeight}ft | {devices.length} Devices
+          </span>
+        </div>
+
+        <button 
+          onClick={onClear} 
+          className="btn-secondary btn-danger-hover"
+          style={{
+            padding: '6px 12px',
+            fontSize: '0.75rem',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 600
+          }}
+        >
+          <span style={{ marginRight: '6px' }}>↺</span> Clear Grid
+        </button>
       </div>
 
       <div className="viz-panel-content">
@@ -111,7 +149,7 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
                 backgroundSize: `${50 * PIXELS_PER_FT}px ${50 * PIXELS_PER_FT}px`
               }}></div>
 
-              {devices.map((d) => (
+              {devices?.map((d) => (
                 <div
                   key={d.id}
                   className={`device-node bg-${d.type}`}
@@ -120,10 +158,10 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
                     top: `${d.position.y * PIXELS_PER_FT}px`,
                     width: `${d.width * PIXELS_PER_FT}px`,
                     height: `${d.height * PIXELS_PER_FT}px`,
-                    // Ensure flex centering is explicit here so the icon sits in the middle
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    position: 'absolute',
+                    borderRadius: '2px',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(0,0,0,0.5)'
                   }}
                   title={`${d.type}\nDim: ${d.width}x${d.height}ft`}
                 >
@@ -133,7 +171,7 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
                       fontSize: '14px', 
                       lineHeight: 1,
                       color: 'white',
-                      filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' // Makes the bolt pop
+                      filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))'
                     }}>
                       ⚡
                     </span>

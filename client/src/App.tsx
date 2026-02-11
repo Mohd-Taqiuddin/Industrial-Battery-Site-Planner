@@ -5,6 +5,7 @@ import { Navbar } from './components/Navbar';
 import { ConfigPanel } from './components/ConfigPanel';
 import { StatsPanel } from './components/StatsPanel';
 import { LayoutPreview } from './components/LayoutPreview';
+import type { DeviceType } from './types';
 
 export default function App() {
   
@@ -26,7 +27,7 @@ export default function App() {
 
   // Handle Export CSV
   const handleExport = () => {
-    if (!layout) return;
+    if (!layout || !layout.placed_devices) return;
     const headers = "ID,Type,X (ft),Y (ft),Width (ft),Height (ft)\n";
     const rows = layout.placed_devices.map(d => 
       `${d.id},${d.type},${d.position.x},${d.position.y},${d.width},${d.height}`
@@ -39,6 +40,13 @@ export default function App() {
     link.click();
     document.body.removeChild(link);
   };
+
+  const handleClear = () => {
+  if (window.confirm("Are you sure you want to clear the current design?")) {
+    const deviceTypes: DeviceType[] = ['MegapackXL', 'Megapack2', 'Megapack', 'PowerPack', 'Transformer'];
+    deviceTypes.forEach(type => setDeviceCount(type, 0));
+  }
+};
 
   return (
     <div className="app-container">
@@ -73,10 +81,11 @@ export default function App() {
           devices={layout?.placed_devices || []} 
           totalWidth={layout?.total_width || 100}
           totalHeight={layout?.total_height || 100}
+          onClear={handleClear}
         />
 
         {/* Right Panel: Metrics & BoM */}
-        <StatsPanel layout={layout} config={config} />
+        <StatsPanel key={activeTabId} layout={layout} config={config} />
       </div>
     </div>
   );

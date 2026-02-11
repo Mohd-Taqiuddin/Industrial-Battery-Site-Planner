@@ -9,16 +9,16 @@ import (
 type DeviceSpec struct {
 	Width  int
 	Height int
-	Cost   int
-	Energy int
+	Cost   float64
+	Energy float64
 }
 
 var Specs = map[DeviceType]DeviceSpec{
 	MegapackXL:  {Width: 40, Height: 10, Cost: 120000, Energy: 4},
 	Megapack2:   {Width: 30, Height: 10, Cost: 80000, Energy: 3},
 	Megapack:    {Width: 30, Height: 10, Cost: 50000, Energy: 2},
-	PowerPack:   {Width: 10, Height: 10, Cost: 20000, Energy: 1},
-	Transformer: {Width: 10, Height: 10, Cost: 10000, Energy: 0},
+	PowerPack:   {Width: 10, Height: 10, Cost: 10000, Energy: 1},
+	Transformer: {Width: 10, Height: 10, Cost: 10000, Energy: -0.5},
 }
 
 // --- VALIDATION ---
@@ -101,8 +101,8 @@ func GenerateLayout(config map[DeviceType]int) LayoutResponse {
 	var placedDevices []PlacedDevice
 	var rows []int // Tracks used width for each row
 
-	totalCost := 0
-	totalEnergy := 0
+	var totalCost float64 = 0
+	var totalEnergy float64 = 0
 
 	for _, item := range items {
 		placed := false

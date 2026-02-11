@@ -1,139 +1,78 @@
 import React, { useState } from 'react';
-import { type LayoutTab } from '../hooks/useSiteLayout';
+import { type LayoutTab } from '../types';
 
-interface Props {
+interface TabBarProps {
   tabs: LayoutTab[];
   activeId: number;
   onSwitch: (id: number) => void;
   onAdd: () => void;
-  onClose: (id: number) => void;
-  onRename: (id: number, newTitle: string) => void;
+  onClose: (id: number, e: React.MouseEvent) => void;
+  onRename: (id: number, name: string) => void;
 }
 
-export const TabBar: React.FC<Props> = ({ tabs, activeId, onSwitch, onAdd, onClose, onRename }) => {
+export const TabBar: React.FC<TabBarProps> = ({ tabs, activeId, onSwitch, onAdd, onClose, onRename }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState("");
+  const [editName, setEditName] = useState('');
 
-  const startEditing = (id: number, currentTitle: string) => {
+  const startEdit = (id: number, currentName: string) => {
     setEditingId(id);
-    setEditValue(currentTitle);
+    setEditName(currentName);
   };
 
   const saveEdit = () => {
-    if (editingId !== null && editValue.trim()) {
-      onRename(editingId, editValue.trim());
+    if (editingId !== null) {
+      onRename(editingId, editName);
+      setEditingId(null);
     }
-    setEditingId(null);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') saveEdit();
-    if (e.key === 'Escape') setEditingId(null);
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 4px', marginBottom: '0', overflowX: 'auto' }}>
-      {tabs.map(tab => {
-        const isActive = tab.id === activeId;
-        const isEditing = tab.id === editingId;
-
-        return (
-          <div 
-            className="tab-scroll-container"
-            key={tab.id}
-            onClick={() => !isEditing && onSwitch(tab.id)}
-            onDoubleClick={() => startEditing(tab.id, tab.title)}
-            title="Double-click to rename"
-            style={{
-              padding: '8px 10px',
-              borderRadius: '6px 6px 0 0',
-              cursor: 'pointer',
-              background: isActive ? 'var(--bg-panel)' : 'var(--bg-app)',
-              border: '1px solid var(--border)',
-              borderBottom: isActive ? '1px solid var(--bg-panel)' : '1px solid var(--border)',
-              marginBottom: '-1px', 
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
-              minWidth: '110px',
-              maxWidth: '180px',
-              justifyContent: 'space-between',
-              position: 'relative',
-              userSelect: 'none',
-              transition: 'background 0.1s',
-              zIndex: isActive ? 10 : 1,
-              overflowY: 'auto'
-            }}
+    <div className="tab-bar" style={{ display: 'flex', overflowX: 'auto', background: 'transparent', padding: '5px 5px 0 5px', gap: '4px' }}>
+      {tabs.map(tab => (
+        <div 
+          key={tab.id}
+          onClick={() => onSwitch(tab.id)}
+          className={`tab ${tab.id === activeId ? 'active' : ''}`}
+          style={{
+            padding: '8px 12px',
+            cursor: 'pointer',
+            background: tab.id === activeId ? 'var(--bg-panel)' : 'transparent',
+            borderTopLeftRadius: '8px',
+            borderTopRightRadius: '8px',
+            border: tab.id === activeId ? '1px solid var(--border)' : 'none',
+            borderBottom: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            minWidth: '100px',
+            color: tab.id === activeId ? 'var(--text-main)' : 'var(--text-muted)',
+            fontWeight: tab.id === activeId ? 600 : 400
+          }}
+        >
+          {editingId === tab.id ? (
+            <input 
+              autoFocus
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onBlur={saveEdit}
+              onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+              style={{ width: '80px', padding: '2px' }}
+            />
+          ) : (
+            <span onDoubleClick={() => startEdit(tab.id, tab.name)}>
+              {tab.name}
+            </span>
+          )}
+          
+          <button 
+            onClick={(e) => onClose(tab.id, e)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1.2em', padding: '0 4px' }}
           >
-            {/* TAB TITLE / INPUT */}
-            {isEditing ? (
-              <input 
-                autoFocus
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={saveEdit}
-                onKeyDown={handleKeyDown}
-                style={{
-                  width: '100%', fontSize: '0.8rem', padding: '2px', 
-                  border: '1px solid var(--accent)', borderRadius: '2px', outline: 'none'
-                }}
-              />
-            ) : (
-              <span style={{
-                whiteSpace: 'nowrap', 
-                overflow: 'hidden', 
-                textOverflow: 'ellipsis',
-                flex: 1 // Push X to the right
-              }}>
-                {tab.title}
-              </span>
-            )}
-
-            {/* INTEGRATED CLOSE BUTTON (X) */}
-            {!isEditing && tabs.length > 1 && (
-              <span 
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  onClose(tab.id); 
-                }}
-                className="close-tab-btn"
-                style={{ 
-                  fontSize: '14px', 
-                  lineHeight: 1, 
-                  opacity: 0.5, 
-                  padding: '2px',
-                  borderRadius: '50%',
-                  width: '16px',
-                  height: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginLeft: '4px'
-                }}
-                title="Close Tab"
-              >
-                ×
-              </span>
-            )}
-          </div>
-        );
-      })}
-      
-      {/* ADD TAB BUTTON */}
-      <button 
-        onClick={onAdd}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '18px', fontWeight: 'bold', color: 'var(--text-muted)',
-          padding: '0 8px', display: 'flex', alignItems: 'center'
-        }}
-        title="Add new Layout Tab"
-      >
-        +
-      </button>
+            ×
+          </button>
+        </div>
+      ))}
+      <button onClick={onAdd} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', padding: '0 10px', color: 'var(--text-muted)' }}>+</button>
     </div>
   );
 };

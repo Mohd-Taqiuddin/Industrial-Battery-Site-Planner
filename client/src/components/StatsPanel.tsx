@@ -1,12 +1,21 @@
 import React from 'react';
-import { type DeviceType, DEVICE_SPECS } from '../types';
+import { type DeviceType, DEVICE_SPECS, type LayoutResponse } from '../types';
 
 interface Props {
-  layout: any;
+  layout: LayoutResponse | null;
   config: Record<DeviceType, number>;
 }
 
 export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
+
+  // console.log("DEBUG: StatsPanel Entry", { layout, config });
+  // // Add this guard at the top to see if it fixes the crash
+  // if (!config) {
+  //   console.error("DEBUG: StatsPanel crashed - config is null!");
+  //   return <div>Loading Config...</div>;
+  // }
+
+
   const formatMoney = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
   
   // Safe calculations to prevent crashes if layout is null
@@ -111,9 +120,9 @@ export const StatsPanel: React.FC<Props> = ({ layout, config }) => {
                   }}></span>
                   Transformer
                 </td>
-                <td>{layout.transformers_count}</td>
-                <td>{100 * layout.transformers_count} <small>sq ft</small></td>
-                <td className="right">{formatMoney(layout.transformers_count * DEVICE_SPECS['Transformer'].cost)}</td>
+                <td>{layout?.transformers_count}</td>
+                <td>{100 * (layout?.transformers_count ?? 0)} <small>sq ft</small></td>
+                <td className="right">{formatMoney((layout?.transformers_count ?? 0) * DEVICE_SPECS['Transformer'].cost)}</td>
               </tr>
             )}
           </tbody>
