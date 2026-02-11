@@ -84,24 +84,25 @@ Body: { "configs": { "MegapackXL": 5, ... } }
 Response: Returns coordinate list (x, y) for every device and total site dimensions.
 
 
-- **Session Management**
+ **Session Management**
+- **Get Sessions**
 `GET /api/sessions`
 
 Response: List of all saved layouts with metadata (Date, Summary).
 
-
+- **Save Session**
 `POST /api/save`
 
 Body: { "id": "optional-uuid", "configs": { ... } }
 
 Response: Returns the saved Session ID.
 
-
+- **Load Session**
 `GET /api/load?id={id}`
 
 Response: The configuration object for that specific ID.
 
-
+- **Delete Session**
 `DELETE /api/delete?id={id}`
 
 Response: 200 OK.
