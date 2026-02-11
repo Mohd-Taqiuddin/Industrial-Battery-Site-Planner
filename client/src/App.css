@@ -60,7 +60,7 @@ body {
 /* Layout Container */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 320px 1fr 300px; /* Precise widths */
+  grid-template-columns: 320px 1fr 300px;
   gap: 1.5rem;
   padding: 1.5rem;
   height: calc(100vh - 80px);
@@ -86,7 +86,6 @@ body {
   border-radius: 10px; 
 }
 
-/* --- RULER CLASSES (Updates for Dark Mode) --- */
 .ruler-x {
   background: var(--ruler-bg) !important;
   border-bottom: 1px solid var(--ruler-border) !important;
@@ -110,8 +109,8 @@ html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%; /* CRITICAL: Ensures the root container fills the window */
-  overflow: hidden; /* Prevents scrollbars on the main window */
+  height: 100%;
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-app);
   color: var(--text-main);
@@ -126,17 +125,14 @@ html, body, #root {
 
 .dashboard-grid {
   display: grid;
-  /* Fixed Width Sides, Fluid Center */
   grid-template-columns: 320px 1fr 340px; 
-  /* Force the grid rows to fill available height */
   grid-template-rows: 1fr; 
   gap: 1rem;
   padding: 1rem;
-  height: 100%; /* Fill the container */
+  height: 100%;
   min-height: 0;
 }
 
-/* --- Panel Logic --- */
 .panel {
   background: var(--bg-panel);
   border: 1px solid var(--border);
@@ -147,17 +143,16 @@ html, body, #root {
   overflow: hidden;
 }
 
-/* Class for Side Panels: Shrink to content, stick to top */
+
 .panel.compact {
   height: auto;
-  align-self: start; /* Don't stretch vertically */
-  max-height: 100%; /* Allow internal scrolling if screen is too short */
+  align-self: start;
+  max-height: 100%;
 }
 
-/* Class for Center Panel: Fill remaining space */
 .panel.fill {
   height: 100%;
-  align-self: stretch; /* Force full height */
+  align-self: stretch;
 }
 
 .panel-header {
@@ -177,7 +172,7 @@ html, body, #root {
   overflow-y: auto;
 }
 
-/* Visualization Specifics */
+
 .viz-panel-content {
   padding: 0;
   flex: 1;
@@ -205,36 +200,27 @@ html, body, #root {
 }
 
 
-/* --- PROFESSIONAL BLUEPRINT GRID --- */
 .viz-container {
   flex: 1;
   background-color: #f8f9fa; 
-
   background-image: 
     linear-gradient(var(--grid-line) 1px, transparent 1px), 
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 50px 50px; 
-  
   position: relative;
   overflow: auto;
   display: flex;
   justify-content: center;
-  /* Allow margin:auto to center content */
-
   flex: 1;
-  background-color: var(--viz-bg); /* <--- THIS WAS THE ISSUE */
-  
-  /* Background grid pattern for the "Table" (Optional, makes it look technical) */
-  background-image: 
-    radial-gradient(var(--border) 1px, transparent 1px);
+  background-color: var(--viz-bg);
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: 20px 20px;
-  
   position: relative;
   overflow: auto;
   display: flex;
 }
 
-/* RULER OVERRIDES */
+
 .ruler-x {
   background: var(--ruler-bg) !important;
   border-bottom: 1px solid var(--ruler-border) !important;
@@ -250,7 +236,6 @@ html, body, #root {
   opacity: 0.3;
 }
 
-/* --- RULERS (The numbers on the side) --- */
 .ruler-x {
   position: sticky;
   top: 0;
@@ -422,7 +407,7 @@ html, body, #root {
     border: 1px solid #ccc;
     box-shadow: none;
     margin-bottom: 20px;
-    height: auto !important; /* Force auto height */
+    height: auto !important;
     page-break-inside: avoid;
   }
 
@@ -467,7 +452,7 @@ input[type=number] {
 /* --- TAB CLOSE BUTTON HOVER --- */
 .close-tab-btn:hover {
   background-color: rgba(0,0,0,0.1);
-  color: #ef4444; /* Red on hover */
+  color: #ef4444;
   opacity: 1 !important;
 }
 
@@ -501,7 +486,6 @@ input[type=number] {
   color: white !important;
 }
 
-/* Add a subtle animation to the blueprint when it clears */
 .viz-container {
   transition: opacity 0.3s ease;
 }

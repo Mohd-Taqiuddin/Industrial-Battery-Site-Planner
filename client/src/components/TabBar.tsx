@@ -66,13 +66,26 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeId, onSwitch, onAdd,
           
           <button 
             onClick={(e) => onClose(tab.id, e)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1.2em', padding: '0 4px' }}
-          >
-            ×
-          </button>
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              color: 'var(--text-muted)', 
+              fontSize: '1.2em', 
+              padding: '0 4px' 
+            }}
+          >×</button>
         </div>
       ))}
-      <button onClick={onAdd} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', padding: '0 10px', color: 'var(--text-muted)' }}>+</button>
+      <button onClick={onAdd} 
+      style={{ 
+        background: 'none', 
+        border: 'none', 
+        cursor: 'pointer', 
+        fontSize: '18px', 
+        padding: '0 10px', 
+        color: 'var(--text-muted)' 
+        }}>+</button>
     </div>
   );
 };
