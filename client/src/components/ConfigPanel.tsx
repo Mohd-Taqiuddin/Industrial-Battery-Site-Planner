@@ -6,7 +6,7 @@ import { SessionManager } from './SessionManager';
 import { TabBar } from './TabBar';
 import { SaveModal } from './SaveModal'; // <--- Import Modal
 
-interface ConfigPanelProps {
+export interface ConfigPanelProps {
   tabs: LayoutTab[];
   activeTabId: number;
   onSwitchTab: (id: number) => void;
