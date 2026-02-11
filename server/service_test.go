@@ -5,12 +5,11 @@ import (
 )
 
 func TestGenerateLayout_WidthConstraint(t *testing.T) {
-	// 1. Setup a heavy config that definitely exceeds 100ft if packed linearly
+	// Setup a heavy config that definitely exceeds 100ft if packed linearly
 	config := map[DeviceType]int{
-		MegapackXL: 5, // 5 * 40ft = 200ft (Should wrap)
+		MegapackXL: 5, // 5 * 40ft = 200ft
 	}
 
-	// 2. Run Logic
 	layout := GenerateLayout(config)
 
 	// 3. Verify Width (Should be <= 100)

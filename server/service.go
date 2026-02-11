@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-// --- SPECS ---
+// SPECS
 type DeviceSpec struct {
 	Width  int
 	Height int
@@ -21,7 +21,6 @@ var Specs = map[DeviceType]DeviceSpec{
 	Transformer: {Width: 10, Height: 10, Cost: 10000, Energy: -0.5},
 }
 
-// --- VALIDATION ---
 func ValidateConfig(configs map[DeviceType]int) error {
 	total := 0
 	for k, v := range configs {
@@ -48,10 +47,9 @@ func ValidateConfig(configs map[DeviceType]int) error {
 	return nil
 }
 
-// --- SMART LAYOUT ALGORITHM (First Fit Decreasing) ---
+// LAYOUT ALGORITHM (First Fit Decreasing)
 func GenerateLayout(config map[DeviceType]int) LayoutResponse {
 	
-	// 1. FLATTEN & PREPARE ITEMS
 	type Item struct {
 		ID   string
 		Type DeviceType
@@ -87,18 +85,18 @@ func GenerateLayout(config map[DeviceType]int) LayoutResponse {
 		})
 	}
 
-	// 2. SORT ITEMS (Largest Width First)
+	// SORT ITEMS (Largest Width First)
 	// This ensures big blocks are placed first, and small blocks backfill the gaps.
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Spec.Width > items[j].Spec.Width
 	})
 
-	// 3. PACKING LOGIC
+	// PACKING LOGIC
 	const MAX_WIDTH = 100
-	const ROW_HEIGHT = 10 // Assuming all devices are 10ft tall for now
+	const ROW_HEIGHT = 10 // As all devices are 10ft tall
 	
 	var placedDevices []PlacedDevice
-	var rows []int // Tracks used width for each row
+	var rows []int
 
 	var totalCost float64 = 0
 	var totalEnergy float64 = 0
@@ -109,19 +107,18 @@ func GenerateLayout(config map[DeviceType]int) LayoutResponse {
 		// Try to fit into an existing row (First Fit)
 		for rIndex, usedWidth := range rows {
 			if usedWidth + item.Spec.Width <= MAX_WIDTH {
-				// Found a gap! Place it here.
 				placedDevices = append(placedDevices, PlacedDevice{
 					ID:     item.ID,
 					Type:   item.Type,
 					Width:  item.Spec.Width,
 					Height: item.Spec.Height,
 					Position: Position{
-						X: usedWidth,      // Place after existing items
+						X: usedWidth,
 						Y: rIndex * ROW_HEIGHT,
 					},
 				})
 				
-				rows[rIndex] += item.Spec.Width // Update row usage
+				rows[rIndex] += item.Spec.Width
 				placed = true
 				break
 			}
@@ -147,7 +144,7 @@ func GenerateLayout(config map[DeviceType]int) LayoutResponse {
 		totalEnergy += item.Spec.Energy
 	}
 
-	// 4. CALCULATE FINAL DIMENSIONS
+	// CALCULATE FINAL DIMENSIONS
 	finalWidth := 0
 	finalHeight := len(rows) * ROW_HEIGHT
 

@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	// 1. Ensure data directory exists
 	if err := os.MkdirAll("/data", 0755); err != nil {
 		fmt.Printf("Fatal: Could not create data directory: %v\n", err)
 		os.Exit(1)
@@ -16,15 +15,14 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// 2. Register Routes
+	// Routes
 	mux.HandleFunc("/api/calculate", HandleCalculate)
 	mux.HandleFunc("/api/save", HandleSave)
 	mux.HandleFunc("/api/sessions", HandleListSessions)
 	mux.HandleFunc("/api/load", HandleLoadSession)
 	mux.HandleFunc("/api/delete", HandleDeleteSession)
 
-	// 3. Add Logging Middleware
-	// This wraps our mux to log every incoming request and its processing time
+	// Logging
 	loggingHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		fmt.Printf("[%s] %s %s\n", r.Method, r.URL.Path, r.RemoteAddr)
@@ -34,10 +32,8 @@ func main() {
 		fmt.Printf("   └─ Completed in %v\n", time.Since(start))
 	})
 
-	// 4. Configure Production Server with Strict Timeouts
 	server := &http.Server{
 		Addr: ":8080",
-		// Wrap with TimeoutHandler to ensure no request hangs forever (5s limit)
 		Handler: http.TimeoutHandler(loggingHandler, 5*time.Second, "Server Timeout"),
 		
 		// TCP/HTTP Level Timeouts

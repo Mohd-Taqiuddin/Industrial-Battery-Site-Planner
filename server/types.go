@@ -1,12 +1,12 @@
 package main
 
-// --- CONFIGURATION ---
+// CONFIGURATION
 const (
 	DATA_FILE     = "/data/sessions.json"
 	MAX_BODY_SIZE = 1024 * 1024 // 1MB Limit
 )
 
-// --- TYPES ---
+// TYPES 
 type DeviceType string
 
 const (
@@ -32,8 +32,7 @@ type Session struct {
 	UnixTime int64              `json:"unix_time"`
 }
 
-// --- NEW: RESPONSE STRUCTURES ---
-
+// RESPONSE STRUCTURES
 type Position struct {
 	X int `json:"x"`
 	Y int `json:"y"`

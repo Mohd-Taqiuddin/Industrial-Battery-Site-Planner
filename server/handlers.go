@@ -9,13 +9,12 @@ import (
 )
 
 func enableCors(w http.ResponseWriter) {
-	// Permissive for demo/take-home ease of use
+	// Permissive for demo... ease of use
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
-// sendJSONError ensures even our error messages follow the API contract
 func sendJSONError(w http.ResponseWriter, message string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -23,7 +22,6 @@ func sendJSONError(w http.ResponseWriter, message string, code int) {
 }
 
 // --- HTTP HANDLERS ---
-
 func HandleCalculate(w http.ResponseWriter, r *http.Request) {
 	enableCors(w)
 	if r.Method == "OPTIONS" {
@@ -73,7 +71,6 @@ func HandleSave(w http.ResponseWriter, r *http.Request) {
 
 	sessionID := req.ID
 	if sessionID == "" {
-		// Collision-resistant ID generation loop
 		for {
 			sessionID = GenerateID()
 			store, err := LoadSessions()
@@ -100,7 +97,7 @@ func HandleSave(w http.ResponseWriter, r *http.Request) {
 		UnixTime: time.Now().Unix(),
 	}
 
-	// Atomic save with full error handling
+	// Atomic save with error handling
 	if err := SaveSession(newSession); err != nil {
 		fmt.Printf("[ERROR] SaveSession failed: %v\n", err)
 		sendJSONError(w, "Critical: Failed to save session to disk", http.StatusInternalServerError)
@@ -119,7 +116,7 @@ func HandleListSessions(w http.ResponseWriter, r *http.Request) {
 
 	store, err := LoadSessions()
 	if err != nil {
-		fmt.Printf("[ERROR] ListSessions failed: %v\n", err)
+		fmt.Printf("[ERROR] List Sessions failed: %v\n", err)
 		sendJSONError(w, "Internal storage error: check server logs", http.StatusInternalServerError)
 		return
 	}

@@ -11,10 +11,9 @@ import (
 	"time"
 )
 
-// --- THREAD-SAFE STORAGE ---
+// THREAD-SAFE STORAGE
 var storeMutex sync.RWMutex
 
-// GenerateID creates a secure, non-predictable ID
 func GenerateID() string {
 	bytes := make([]byte, 4) // 8 hex characters
 	if _, err := rand.Read(bytes); err != nil {
@@ -23,7 +22,7 @@ func GenerateID() string {
 	return "SAVE-" + hex.EncodeToString(bytes)
 }
 
-// Internal helper: Reads the file WITHOUT locking. 
+// Reads the file WITHOUT locking. 
 // Only call this when you ALREADY hold the mutex!
 func loadSessionsRaw() (map[string]Session, error) {
 	store := make(map[string]Session)
@@ -53,22 +52,22 @@ func SaveSession(s Session) error {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
 
-	// 1. Load existing data (using the internal helper because we already have the lock)
+	// Load existing data
 	store, err := loadSessionsRaw()
 	if err != nil {
 		return err
 	}
 
-	// 2. Update the map
+	// Update the map
 	store[s.ID] = s
 
-	// 3. Serialize
+	// Serialize
 	data, err := json.MarshalIndent(store, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to serialize session: %w", err)
 	}
 
-	// 4. Perform atomic write
+	// Perform atomic write
 	return atomicWriteFile(DATA_FILE, data)
 }
 
@@ -114,7 +113,6 @@ func atomicWriteFile(filename string, data []byte) error {
 		return fmt.Errorf("failed to close temp file: %w", err)
 	}
 
-	// Rename is an atomic operation in most OSs
 	if err := os.Rename(tmpFile.Name(), filename); err != nil {
 		return fmt.Errorf("atomic swap failed: %w", err)
 	}
