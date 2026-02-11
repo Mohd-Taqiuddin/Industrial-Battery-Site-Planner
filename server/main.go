@@ -7,7 +7,26 @@ import (
 	"time"
 )
 
+
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins for simplicity; adjust as needed for production
+		
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization")
+
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
+
 	if err := os.MkdirAll("./data", 0755); err != nil {
 		fmt.Printf("Fatal: Could not create data directory: %v\n", err)
 		os.Exit(1)
@@ -22,30 +41,33 @@ func main() {
 	mux.HandleFunc("/api/load", HandleLoadSession)
 	mux.HandleFunc("/api/delete", HandleDeleteSession)
 
-	// Logging
+	// Logging Middleware
 	loggingHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		mux.ServeHTTP(w, r)
 		fmt.Printf("[%s] %s %s - %v\n", r.Method, r.URL.Path, r.RemoteAddr, time.Since(start))
 	})
 
+	// WRAP THE HANDLER WITH CORS
+	timeoutHandler := http.TimeoutHandler(loggingHandler, 5*time.Second, "Server Timeout")
+	finalHandler := enableCORS(timeoutHandler) 
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // Default port if not specified
+		port = "8080" 
 	}
 
 	server := &http.Server{
-		Addr: ":" + port,
-		Handler: http.TimeoutHandler(loggingHandler, 5*time.Second, "Server Timeout"),
+		Addr:    ":" + port,
+		Handler: finalHandler,
 		
-		// TCP/HTTP Level Timeouts
-		ReadTimeout:       5 * time.Second,  // Max time to read the whole request
-		WriteTimeout:      10 * time.Second, // Max time to write the response
-		IdleTimeout:       120 * time.Second, // Max time to keep an idle connection open
-		ReadHeaderTimeout: 2 * time.Second,  // Max time to read just the headers (prevents Slowloris)
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
 	}
 
-	fmt.Println(" Tesla Industrial Battery Server running on :" + port)
+	fmt.Println("⚡ Tesla Industrial Battery Server running on :" + port)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Printf("Server failed: %v\n", err)
 	}

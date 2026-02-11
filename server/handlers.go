@@ -8,13 +8,6 @@ import (
 	"time"
 )
 
-func enableCors(w http.ResponseWriter) {
-	// Permissive for demo... ease of use
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-}
-
 func sendJSONError(w http.ResponseWriter, message string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -23,10 +16,6 @@ func sendJSONError(w http.ResponseWriter, message string, code int) {
 
 // --- HTTP HANDLERS ---
 func HandleCalculate(w http.ResponseWriter, r *http.Request) {
-	enableCors(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
 
 	// Limit Request Size to prevent Memory Exhaustion
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_BODY_SIZE)
@@ -51,10 +40,6 @@ func HandleCalculate(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleSave(w http.ResponseWriter, r *http.Request) {
-	enableCors(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
 
 	r.Body = http.MaxBytesReader(w, r.Body, MAX_BODY_SIZE)
 
@@ -109,10 +94,6 @@ func HandleSave(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleListSessions(w http.ResponseWriter, r *http.Request) {
-	enableCors(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
 
 	store, err := LoadSessions()
 	if err != nil {
@@ -136,10 +117,6 @@ func HandleListSessions(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleLoadSession(w http.ResponseWriter, r *http.Request) {
-	enableCors(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
 
 	id := r.URL.Query().Get("id")
 	if id == "" {
@@ -162,10 +139,6 @@ func HandleLoadSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
-	enableCors(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
 	if r.Method != http.MethodDelete {
 		sendJSONError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
