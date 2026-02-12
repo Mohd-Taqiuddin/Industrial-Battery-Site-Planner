@@ -1,4 +1,4 @@
-# Tesla Energy Site Layout Planner
+# Industrial Energy Site Layout Planner
 
 A full-stack tool to design, validate, and visualize industrial battery sites. Built with **React + TypeScript** and a **Go** backend.
 
@@ -32,16 +32,38 @@ A full-stack tool to design, validate, and visualize industrial battery sites. B
 - **Containerization:** Docker & Docker Compose
 
 
-##  Quick Start
+## 🚀 Quick Start
 
-Run the entire stack with a single command:
+## Option 1: Docker (Recommended)
+- Run the entire stack (Frontend + Backend + Database) with one command:
 
 ```bash
 docker compose up --build
 ```
 
-Then open `http://localhost:8000`.
+```text
+Frontend: http://localhost:8000
 
+Backend: http://localhost:8080
+```
+
+Option 2: Manual Setup
+
+Backend (Go)
+
+```bash
+cd server
+go mod tidy
+go run .
+```
+
+Frontend (React)
+
+```bash
+cd client
+npm install
+npm run dev
+```
 
 Live Example: `https://industrial-battery-site-planner.vercel.app/`
 
@@ -111,7 +133,24 @@ Response: The configuration object for that specific ID.
 
 Response: 200 OK.
 
+## Running Tests
+- This project includes unit tests for critical UI components (ConfigPanel) and logic.
+
+```bash
+cd client
+npm test
+```
+
 ## 📝 Design Notes
 - Land dimensions are derived from the auto-generated layout bounding box (width <= 100 ft).
 - Energy density is provided in MWh per sq ft and MWh per acre.
 - Transformers: The system enforces a hard constraint of 1 Transformer for every 2 Batteries (rounded down).
+
+## 📸 Screenshots
+
+### MAIN UI
+![Main UI](./screenshots/main-view.png)
+
+
+### Layout
+![Main UI](./screenshots/layout-view.png)
