@@ -135,10 +135,16 @@ Response: 200 OK.
 
 ## Running Tests
 - This project includes unit tests for critical UI components (ConfigPanel) and logic.
-
+- Frontend
 ```bash
 cd client
 npm test
+```
+
+- Backend
+```bash
+cd server
+go test -v
 ```
 
 ## 📝 Design Notes
