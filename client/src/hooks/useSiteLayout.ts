@@ -111,7 +111,6 @@ export function useSiteLayout() {
     setTabs(prev => prev.map(t => t.id === id ? { ...t, name: newName } : t));
   };
 
-  // --- 5. CONFIG LOGIC ---
   const updateConfigLogic = (type: DeviceType, val: number) => {
     const safeVal = Math.max(0, val);
     const tempConfig = { ...config, [type]: safeVal };

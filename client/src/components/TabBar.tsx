@@ -45,9 +45,11 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeId, onSwitch, onAdd,
             alignItems: 'center',
             gap: '8px',
             minWidth: '100px',
+            maxWidth: '160px',
             color: tab.id === activeId ? 'var(--text-main)' : 'var(--text-muted)',
             fontWeight: tab.id === activeId ? 600 : 400
           }}
+          title={tab.name}
         >
           {editingId === tab.id ? (
             <input 
@@ -59,7 +61,13 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeId, onSwitch, onAdd,
               style={{ width: '80px', padding: '2px' }}
             />
           ) : (
-            <span onDoubleClick={() => startEdit(tab.id, tab.name)}>
+            <span onDoubleClick={() => startEdit(tab.id, tab.name)}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {tab.name}
             </span>
           )}
@@ -72,7 +80,8 @@ export const TabBar: React.FC<TabBarProps> = ({ tabs, activeId, onSwitch, onAdd,
               cursor: 'pointer', 
               color: 'var(--text-muted)', 
               fontSize: '1.2em', 
-              padding: '0 4px' 
+              padding: '0 4px',
+              flexShrink: 0
             }}
           >×</button>
         </div>

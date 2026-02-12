@@ -11,7 +11,6 @@ A full-stack tool to design, validate, and visualize industrial battery sites. B
 - **Server-Side Saving:** Persist completed designs to the backend (`JSON` storage).
 - **Load/Edit:** Retrieve past designs via unique Session IDs.
 - **Real-time Analytics:** Calculates Cost, Energy (MWh), Footprint (sq ft), and Energy Density (MWh/acre).
-- **Session Persistence:** Save/Load designs via server-side storage (survives cache clears).
 - **Theme-Aware Rendering:** Toggles between a "Dark Mode" (Night/CAD view) and "Light Mode" (Day/Schematic view).
 - **Export Tools:** CSV Export and Print-ready reports.
 
@@ -44,11 +43,16 @@ docker compose up --build
 Then open `http://localhost:8000`.
 
 
+Live Example: `https://industrial-battery-site-planner.vercel.app/`
+
+
 ## 📂 Project Structure
 
 ```text
 ├── client/
 │   ├── src/
+│   │   ├── utils/
+│   │   │   ├── dateUtils.ts            # Format to local time
 │   │   ├── components/
 │   │   │   ├── ConfigPanel.tsx         # Main sidebar controller
 │   │   │   ├── LayoutPreview.tsx       # The Visual Blueprint (Grid)
