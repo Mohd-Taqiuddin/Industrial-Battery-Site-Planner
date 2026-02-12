@@ -6,7 +6,7 @@ services:
     volumes:
       # This will map "server_data" (on host) to "/data" (in container)
       # If we rebuild, "server_data" stays safe on hard drive!
-      - ./server_data:/data 
+      - ./server/data:/root/data
 
   web:
     build: ./client
