@@ -91,7 +91,7 @@ export function useSiteLayout() {
     const newId = Math.max(...tabs.map(t => t.id)) + 1;
     setTabs([...tabs, { 
       id: newId, 
-      name: `Design ${newId}`, 
+      name: `Design`, 
       config: { ...DEFAULT_CONFIG }, 
       layout: null,
       serverId: undefined 
