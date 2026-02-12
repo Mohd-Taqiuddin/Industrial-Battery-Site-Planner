@@ -1,76 +1,100 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-// Import BOTH the Component and the Interface
-import { ConfigPanel, type ConfigPanelProps } from './ConfigPanel'; 
+import { ConfigPanel } from './ConfigPanel';
+import type { DeviceType, LayoutTab } from '../types';
 
-// Define props using the exported interface
-const defaultProps: ConfigPanelProps = {
-  config: { MegapackXL: 0, Megapack2: 0, Megapack: 0, PowerPack: 0, Transformer: 0 },
-  onUpdate: vi.fn(),
-  onSetCount: vi.fn(),
-  onExport: vi.fn(),
-  onSave: vi.fn(),
-  onLoad: vi.fn(),
-  onDelete: vi.fn(),
-  sessions: [],
-  tabs: [],
-  activeTabId: 1,
-  onSwitchTab: vi.fn(),
-  onAddTab: vi.fn(),
-  onCloseTab: vi.fn(),
-  onRenameTab: vi.fn(),
+const createDefaultProps = () => {
+  const defaultConfig: Record<DeviceType, number> = {
+    MegapackXL: 0,
+    Megapack2: 0,
+    Megapack: 0,
+    PowerPack: 0,
+    Transformer: 0,
+  };
+
+  const defaultTab: LayoutTab = {
+    id: 1,
+    name: 'Design 1',
+    config: defaultConfig,
+    layout: null,
+    serverId: undefined,
+  };
+
+  return {
+    tabs: [defaultTab],
+    activeTabId: 1,
+    onSwitchTab: vi.fn(),
+    onAddTab: vi.fn(),
+    onCloseTab: vi.fn(),
+    onRenameTab: vi.fn(),
+    config: defaultConfig,
+    onUpdate: vi.fn(),
+    onSetCount: vi.fn(),
+    onExport: vi.fn(),
+    onSave: vi.fn().mockResolvedValue('test-id'),
+    onLoad: vi.fn().mockResolvedValue(true),
+    onDelete: vi.fn(),
+    sessions: [],
+    onClear: vi.fn(), 
+  };
 };
 
 describe('ConfigPanel Component', () => {
+
   it('renders all device inputs', () => {
-    // @ts-ignore - (Optional) If TS complains about missing specialized props, ignore for test
-    render(<ConfigPanel {...defaultProps} />);
+    const props = createDefaultProps();
+    render(<ConfigPanel {...props} />);
+    
+    // Check for specific labels to be sure
     expect(screen.getByText('Megapack XL')).toBeInTheDocument();
+    expect(screen.getByText('Transformer')).toBeInTheDocument();
   });
 
   it('calls onUpdate when + button is clicked', () => {
-    const onUpdateMock = vi.fn();
-    // @ts-ignore
-    render(<ConfigPanel {...defaultProps} onUpdate={onUpdateMock} />);
-    
-    // Find all "+" buttons
+    const props = createDefaultProps();
+    render(<ConfigPanel {...props} />);
+
+    // Targeting the specific "+" button for MegapackXL
     const plusButtons = screen.getAllByText('+');
-    // Click the first one
     fireEvent.click(plusButtons[1]);
 
-    // Verify the mock was called
-    expect(onUpdateMock).toHaveBeenCalled();
+    expect(props.onUpdate).toHaveBeenCalledWith('MegapackXL', 1);
   });
 
-  it('calls onSetCount when typing a number directly', () => {
-    const onSetCountMock = vi.fn();
-    // @ts-ignore
-    render(<ConfigPanel {...defaultProps} onSetCount={onSetCountMock} />);
+  it('calls onSetCount when typing a number', () => {
+    const props = createDefaultProps();
+    render(<ConfigPanel {...props} />);
 
-    // Find the input field for Megapack XL (it's the first number input)
-    // We use 'spinbutton' role which maps to <input type="number" />
     const inputs = screen.getAllByRole('spinbutton');
-    const xlInput = inputs[0];
+    fireEvent.change(inputs[0], { target: { value: '5' } });
 
-    // Simulate user typing "5"
-    fireEvent.change(xlInput, { target: { value: '5' } });
-
-    // Verify it called the function with (Type, Value)
-    expect(onSetCountMock).toHaveBeenCalledWith('MegapackXL', 5);
+    expect(props.onSetCount).toHaveBeenCalledWith('MegapackXL', 5);
   });
 
-  // Test 4: Save Button
-  it('calls onSave when the Save button is clicked', () => {
-    const onSaveMock = vi.fn();
-    // @ts-ignore
-    render(<ConfigPanel {...defaultProps} onSave={onSaveMock} />);
+  it('triggers onSave when Save button is clicked', async () => {
+    const props = createDefaultProps();
+    render(<ConfigPanel {...props} />);
 
-    // FIX: Look specifically for a BUTTON with the name "Save"
-    // This ignores "Saved Layouts" text which is not a button
-    const saveBtn = screen.getByRole('button', { name: 'Save' });
-
+    const saveBtn = screen.getByRole('button', { name: /Save/i });
     fireEvent.click(saveBtn);
 
-    expect(onSaveMock).toHaveBeenCalled();
+    expect(props.onSave).toHaveBeenCalled();
+  });
+
+  it('displays the correct session name in the tab', () => {
+    const props = createDefaultProps();
+    // Override the name for this specific test
+    props.tabs[0].name = "Project Alpha";
+    render(<ConfigPanel {...props} />);
+
+    expect(screen.getByText('Project Alpha')).toBeInTheDocument();
+  });
+
+  it('renders action buttons', () => {
+    const props = createDefaultProps();
+    render(<ConfigPanel {...props} />);
+
+    expect(screen.getByRole('button', { name: /Save/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Export CSV/i })).toBeInTheDocument();
   });
 });

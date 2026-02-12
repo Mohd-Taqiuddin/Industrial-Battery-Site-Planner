@@ -77,7 +77,7 @@ func HandleSave(w http.ResponseWriter, r *http.Request) {
 	newSession := Session{
 		ID:       sessionID,
 		Config:   req.Configs,
-		Date:     time.Now().Format("01/02/2006, 03:04 PM"),
+		Date:     time.Now().UTC().Format(time.RFC3339),
 		Summary:  fmt.Sprintf("%d Devices", totalItems),
 		UnixTime: time.Now().Unix(),
 	}

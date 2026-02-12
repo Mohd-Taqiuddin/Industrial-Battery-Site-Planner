@@ -24,15 +24,22 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
   for (let i = 0; i <= Math.max(totalHeight, 100); i += 20) yTicks.push(i);
 
   return (
-    <div className="panel fill">
-      <div className="panel-header" style={{ 
-      borderBottom: 'none',
+    <div className="panel fill" style={{
       display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center',
-      padding: '10px 20px',
-      width: '100%',
-      boxSizing: 'border-box' 
+      flexDirection: 'column', 
+      height: '100%',
+      overflow: 'hidden',
+      position: 'relative'
+    }}>
+      <div className="panel-header" style={{ 
+        borderBottom: 'none',
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        padding: '10px 20px',
+        width: '100%',
+        boxSizing: 'border-box',
+        flexShrink: 0
       }}>
         <div style={{ flex: 1 }}>
           <h3 style={{ margin: 0 }}>Site Layout Blueprint</h3>
@@ -47,7 +54,8 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        zIndex: 10
+        zIndex: 10,
+        flexShrink: 0
       }}>
         <div>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>
@@ -73,150 +81,158 @@ export const LayoutPreview: React.FC<Props> = ({ devices, totalWidth, totalHeigh
         </button>
       </div>
 
-      <div className="viz-panel-content">
-        <div className="viz-container">
+      {/* --- SCROLLABLE BLUEPRINT AREA --- */}
+      <div className="blueprint-scroll-area" style={{
+        flex: 1,
+        minHeight: 0,
+        overflow: 'auto',
+        background: 'var(--bg-workspace)',
+        display: 'flex',
+        position: 'relative'
+      }}>
+        
+        {/* THE CANVAS WRAPPER */}
+        <div style={{ 
+          position: 'relative', 
+          margin: 'auto',
+          padding: '40px', 
+          flexShrink: 0
+        }}>
           
+          {/* X-AXIS RULER */}
+          <div className="ruler-x" style={{ 
+            width: `${vizWidth}px`, 
+            height: '25px',
+            position: 'absolute', 
+            top: 15, 
+            left: 40, 
+            display: 'flex'
+          }}>
+            {xTicks.map(tick => (
+              <div key={tick} style={{ 
+                position: 'absolute', 
+                left: `${tick * PIXELS_PER_FT}px`, 
+                transform: 'translateX(-50%)',
+                fontSize: '10px', fontWeight: 600
+              }}>
+                {tick}'
+                <div className="ruler-tick" style={{height: '5px', width: '1px', margin: 'auto'}}></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Y-AXIS RULER */}
+          <div className="ruler-y" style={{ 
+            height: `${vizHeight}px`, 
+            width: '25px',
+            position: 'absolute', 
+            top: 40, 
+            left: 15,
+          }}>
+            {yTicks.map(tick => (
+              <div key={tick} style={{ 
+                position: 'absolute', 
+                top: `${tick * PIXELS_PER_FT}px`, 
+                width: '100%', 
+                textAlign: 'right', 
+                paddingRight: '4px',
+                transform: 'translateY(-50%)',
+                fontSize: '10px', fontWeight: 600
+              }}>
+                {tick}
+                <div className="ruler-tick" style={{width: '5px', height: '1px', float: 'right', marginTop: '6px'}}></div>
+              </div>
+            ))}
+          </div>
+
+          {/* MAIN DRAWING BLUEPRINT */}
           <div style={{ 
-            position: 'relative', 
-            margin: 'auto', 
-            padding: '40px', 
-            display: 'inline-block' 
+            position: 'relative',
+            width: `${vizWidth}px`, 
+            height: `${vizHeight}px`,
+            background: 'var(--blueprint-bg)', 
+            border: '1px solid var(--blueprint-border)', 
+            boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+            backgroundImage: `
+              linear-gradient(var(--blueprint-grid) 1px, transparent 1px), 
+              linear-gradient(90deg, var(--blueprint-grid) 1px, transparent 1px)
+            `,
+            backgroundSize: `${10 * PIXELS_PER_FT}px ${10 * PIXELS_PER_FT}px`,
           }}>
             
-            {/* X-AXIS RULER */}
-            <div className="ruler-x" style={{ 
-              width: `${vizWidth}px`, 
-              height: '25px',
-              position: 'absolute', 
-              top: 15, 
-              left: 40, 
-              display: 'flex'
-            }}>
-              {xTicks.map(tick => (
-                <div key={tick} style={{ 
-                  position: 'absolute', 
-                  left: `${tick * PIXELS_PER_FT}px`, 
-                  transform: 'translateX(-50%)',
-                  fontSize: '10px', fontWeight: 600
-                }}>
-                  {tick}'
-                  <div className="ruler-tick" style={{height: '5px', width: '1px', margin: 'auto'}}></div>
-                </div>
-              ))}
-            </div>
-
-            {/* Y-AXIS RULER */}
-            <div className="ruler-y" style={{ 
-              height: `${vizHeight}px`, 
-              width: '25px',
-              position: 'absolute', 
-              top: 40, 
-              left: 15,
-            }}>
-              {yTicks.map(tick => (
-                <div key={tick} style={{ 
-                  position: 'absolute', 
-                  top: `${tick * PIXELS_PER_FT}px`, 
-                  width: '100%', 
-                  textAlign: 'right', 
-                  paddingRight: '4px',
-                  transform: 'translateY(-50%)',
-                  fontSize: '10px', fontWeight: 600
-                }}>
-                  {tick}
-                  <div className="ruler-tick" style={{width: '5px', height: '1px', float: 'right', marginTop: '6px'}}></div>
-                </div>
-              ))}
-            </div>
-
-            {/* MAIN DRAWING BLUEPRINT */}
-            <div style={{ 
-              position: 'relative',
-              width: `${vizWidth}px`, 
-              height: `${vizHeight}px`,
-              background: 'var(--blueprint-bg)', 
-              border: '1px solid var(--blueprint-border)', 
-              boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+            {/* Major Grid Lines (Every 50ft) */}
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none',
               backgroundImage: `
-                linear-gradient(var(--blueprint-grid) 1px, transparent 1px), 
-                linear-gradient(90deg, var(--blueprint-grid) 1px, transparent 1px)
+                linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)
               `,
-              backgroundSize: `${10 * PIXELS_PER_FT}px ${10 * PIXELS_PER_FT}px`,  // 10ft grid
-            }}>
-              
-              {/* Major Grid Lines (Every 50ft) for texture */}
+              backgroundSize: `${50 * PIXELS_PER_FT}px ${50 * PIXELS_PER_FT}px`
+            }}></div>
+
+            {/* EMPTY STATE */}
+            {devices.length === 0 && (
               <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none',
-                backgroundImage: `
-                  linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px), 
-                  linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)
-                `,
-                backgroundSize: `${50 * PIXELS_PER_FT}px ${50 * PIXELS_PER_FT}px`
-              }}></div>
-
-              {devices.length === 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  color: 'var(--text-muted)',
-                  textAlign: 'center',
-                  opacity: 0.5,
-                  pointerEvents: 'none',
-                  zIndex: 1 // Keep it above the grid but below everything else
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                color: 'var(--text-muted)',
+                textAlign: 'center',
+                opacity: 0.5,
+                pointerEvents: 'none',
+                zIndex: 1
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚡</div>
+                <div style={{ 
+                  fontWeight: 600, 
+                  fontSize: '0.8rem', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.15em',
+                  fontFamily: 'monospace' 
                 }}>
-                  <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⚡</div>
-                  <div style={{ 
-                    fontWeight: 600, 
-                    fontSize: '0.8rem', 
-                    textTransform: 'uppercase', 
-                    letterSpacing: '0.15em',
-                    fontFamily: 'monospace' 
-                  }}>
-                    Add devices to begin layout
-                  </div>
+                  Add devices to begin layout
                 </div>
-              )}
+              </div>
+            )}
 
-              {devices?.map((d) => (
-                <div
-                  key={d.id}
-                  className={`device-node bg-${d.type}`}
-                  style={{
-                    left: `${d.position.x * PIXELS_PER_FT}px`,
-                    top: `${d.position.y * PIXELS_PER_FT}px`,
-                    width: `${d.width * PIXELS_PER_FT}px`,
-                    height: `${d.height * PIXELS_PER_FT}px`,
-                    position: 'absolute',
-                    borderRadius: '2px',
-                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(0,0,0,0.5)'
-                  }}
-                  title={`${d.type}\nDim: ${d.width}x${d.height}ft`}
-                >
-                  {/* LOGIC: IF Transformer -> Show Bolt. ELSE -> Show Text if wide enough */}
-                  {d.type === 'Transformer' ? (
-                    <span style={{ 
-                      fontSize: '14px', 
-                      lineHeight: 1,
-                      color: 'white',
-                      filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))'
-                    }}>
-                      ⚡
+            {/* DEVICES RENDER */}
+            {devices?.map((d) => (
+              <div
+                key={d.id}
+                className={`device-node bg-${d.type}`}
+                style={{
+                  left: `${d.position.x * PIXELS_PER_FT}px`,
+                  top: `${d.position.y * PIXELS_PER_FT}px`,
+                  width: `${d.width * PIXELS_PER_FT}px`,
+                  height: `${d.height * PIXELS_PER_FT}px`,
+                  position: 'absolute',
+                  borderRadius: '2px',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(0,0,0,0.5)'
+                }}
+                title={`${d.type}\nDim: ${d.width}x${d.height}ft`}
+              >
+                {d.type === 'Transformer' ? (
+                  <span style={{ 
+                    fontSize: '14px', 
+                    lineHeight: 1,
+                    color: 'white',
+                    filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))'
+                  }}>
+                    ⚡
+                  </span>
+                ) : (
+                  d.width >= 10 && (
+                    <span style={{ fontSize: d.width < 20 ? '9px' : '11px' }}>
+                      {d.type === 'MegapackXL' ? 'MXL' : 
+                       d.type === 'Megapack2' ? 'MP2' : 
+                       d.type === 'PowerPack' ? 'PP' : 'MP'}
                     </span>
-                  ) : (
-                    d.width >= 10 && (
-                      <span style={{ fontSize: d.width < 20 ? '9px' : '11px' }}>
-                        {d.type === 'MegapackXL' ? 'MXL' : 
-                        d.type === 'Megapack2' ? 'MP2' : 
-                        d.type === 'PowerPack' ? 'PP' : 'MP'}
-                      </span>
-                    )
-                  )}
-                </div>
-              ))}
-            </div>
+                  )
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

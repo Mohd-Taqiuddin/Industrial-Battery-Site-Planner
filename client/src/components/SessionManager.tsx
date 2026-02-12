@@ -1,5 +1,6 @@
 import React from 'react';
 import { type SessionSummary } from '../types';
+import { formatLocalTime } from '../utils/dateUtils';
 
 interface SessionManagerProps {
   sessions: SessionSummary[];
@@ -48,7 +49,7 @@ export const SessionManager: React.FC<SessionManagerProps> = ({ sessions, onSave
         {sessions?.map(s => (
           <div key={s.id} className="session-item" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'var(--bg-app)', marginBottom: '5px', borderRadius: '4px', alignItems: 'center' }}>
             <div onClick={() => onLoad(s.id)} style={{ cursor: 'pointer', flex: 1 }}>
-              <div style={{ fontWeight: '600', fontSize: '0.85rem' }}>{s.date}</div>
+              <div style={{ fontWeight: '600', fontSize: '0.85rem' }}>{formatLocalTime(s.date)}</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{s.summary}</div>
             </div>
             <button onClick={() => onDelete(s.id)} style={{ color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', padding: '5px' }}>🗑</button>

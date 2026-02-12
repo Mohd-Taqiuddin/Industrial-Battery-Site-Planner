@@ -17,7 +17,7 @@ const STORAGE_KEY = 'tesla-layout-tabs';
 const ID_KEY = 'tesla-active-tab-id';
 
 export function useSiteLayout() {
-  // --- 1. STATE INITIALIZATION (Load from LocalStorage) ---
+  // STATE INITIALIZATION (Load from LocalStorage)
   const [tabs, setTabs] = useState<LayoutTab[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -44,19 +44,17 @@ export function useSiteLayout() {
 
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
 
-  // Helper: Get Active Tab Data
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
   const config = activeTab.config;
   const layout = activeTab.layout; 
 
-  // --- 2. AUTO-SAVE EFFECT ---
-  // Save to browser memory whenever tabs or active ID changes
+  // AUTO-SAVE EFFECT - Save to LocalStorage whenever tabs or activeTabId changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tabs));
     localStorage.setItem(ID_KEY, activeTabId.toString());
   }, [tabs, activeTabId]);
 
-  // --- 3. FETCH LAYOUT ---
+  // FETCH LAYOUT
   const fetchLayout = useCallback(async () => {
     const totalItems = Object.values(config).reduce((sum, val) => sum + val, 0);
 
@@ -88,7 +86,7 @@ export function useSiteLayout() {
     return () => clearTimeout(timer);
   }, [fetchLayout]);
 
-  // --- 4. TAB MANAGEMENT ---
+  // TAB MANAGEMENT
   const addTab = () => {
     const newId = Math.max(...tabs.map(t => t.id)) + 1;
     setTabs([...tabs, { 
@@ -139,19 +137,18 @@ export function useSiteLayout() {
   const setDeviceCount = (type: DeviceType, value: number) => 
     updateConfigLogic(type, value);
 
-  // --- 6. CLEAR ALL DEVICES (The Fix) ---
+  // CLEAR ALL DEVICES
   const clearAllDevices = () => {
     setTabs(prev => prev.map(tab => {
       if (tab.id !== activeTabId) return tab;
       return { 
         ...tab, 
         config: { MegapackXL: 0, Megapack2: 0, Megapack: 0, PowerPack: 0, Transformer: 0 },
-        layout: null // Explicitly clear the layout too
+        layout: null
       };
     }));
   };
 
-  // --- 7. SERVER ACTIONS ---
   const fetchSessions = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/sessions`);
